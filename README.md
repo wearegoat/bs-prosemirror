@@ -1,2 +1,2 @@
-# bs-prosemirror
-Reason/Bucklescript bindings for ProseMirror
+# bs-prosemirror (WIP)
+Reason/Bucklescript bindings for ProseMirror.

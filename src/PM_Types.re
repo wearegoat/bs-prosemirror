@@ -1,0 +1,17 @@
+type node;
+type nodeType;
+type nodeRange;
+type fragment;
+type schema;
+type resolvedPos;
+type mark;
+type markType;
+type transaction;
+type selection;
+type nodeSelection;
+type textSelection;
+type allSelection;
+type editorState;
+type plugin;
+type editorView;
+type decorationSet;

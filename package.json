@@ -1,0 +1,36 @@
+{
+  "name": "bs-prosemirror",
+  "version": "0.1.0",
+  "description": "Reason/Bucklescript bindings for ProseMirror",
+  "scripts": {
+    "build": "bsb -make-world",
+    "predev": "npm run build",
+    "dev": "parcel example/index.html",
+    "start": "bsb -make-world -w",
+    "clean": "bsb -clean-world"
+  },
+  "keywords": [
+    "BuckleScript",
+    "ProseMirror"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "bs-platform": "^5.0.4",
+    "bs-webapi": "^0.14.3",
+    "bsb-js": "^1.1.7",
+    "parcel-bundler": "^1.12.3"
+  },
+  "dependencies": {
+    "prosemirror-commands": "^1.0.7",
+    "prosemirror-dropcursor": "^1.1.1",
+    "prosemirror-history": "^1.0.4",
+    "prosemirror-keymap": "^1.0.1",
+    "prosemirror-model": "^1.7.0",
+    "prosemirror-schema-basic": "^1.0.1",
+    "prosemirror-schema-list": "^1.0.3",
+    "prosemirror-state": "^1.2.2",
+    "prosemirror-transform": "^1.1.3",
+    "prosemirror-view": "^1.9.0"
+  }
+}

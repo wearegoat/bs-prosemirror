@@ -13,7 +13,11 @@
     "BuckleScript",
     "ProseMirror"
   ],
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wearegoat/bs-prosemirror.git"
+  },
+  "author": "Alexey Golev <alexey.golev@wearegoat.com",
   "license": "MIT",
   "devDependencies": {
     "bs-platform": "^5.0.4",

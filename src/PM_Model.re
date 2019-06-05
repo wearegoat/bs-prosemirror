@@ -549,7 +549,7 @@ module Fragment = {
     }) =
     "";
   [@bs.send] external toString: t => string = "";
-  [@bs.send] external toJSON: t => Js.Json.t = "check";
+  [@bs.send] external toJSON: t => Js.Json.t = "";
 
   [@bs.module "prosemirror-model"] [@bs.scope "Fragment"]
   external fromJSON: (Schema.t, Js.Json.t) => t = "";

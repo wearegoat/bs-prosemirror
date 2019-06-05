@@ -208,7 +208,7 @@ module Transform = {
         ~range: Model.NodeRange.t,
         ~wrappers: array({
                      .
-                     "type": Model.NodeType.t,
+                     "type_": Model.NodeType.t,
                      "attrs": Model.Attrs.t,
                    })
       ) =>
@@ -240,14 +240,17 @@ module Transform = {
       ) =>
       t;
     let join: (t, ~pos: int, ~depth: int=?, unit) => t;
+
+    /**
+    The following helper functions can be useful when creating transformations or determining whether they are even possible. 
+    */
     let replaceStep:
-      (t, ~doc: Model.Node.t, ~from: int, ~to_: int=?, ~slice: Model.Slice.t=?, unit) =>
+      (~doc: Model.Node.t, ~from: int, ~to_: int=?, ~slice: Model.Slice.t=?, unit) =>
       option(Step.t);
-    let liftTarget: (t, ~range: Model.NodeRange.t) => option(int);
+    let liftTarget: (~range: Model.NodeRange.t) => option(int);
 
     let findWrapping:
       (
-        t,
         ~range: Model.NodeRange.t,
         ~nodeType: Model.NodeType.t,
         ~attrs: Model.Attrs.t=?,
@@ -263,7 +266,6 @@ module Transform = {
       );
     let canSplit:
       (
-        t,
         ~doc: Model.Node.t,
         ~pos: int,
         ~depth: int=?,
@@ -275,11 +277,11 @@ module Transform = {
                        =?
       ) =>
       bool;
-    let canJoin: (t, ~doc: Model.Node.t, ~pos: int) => bool;
-    let joinPoint: (t, ~doc: Model.Node.t, ~pos: int, ~dir: int=?, unit) => option(int);
+    let canJoin: (~doc: Model.Node.t, ~pos: int) => bool;
+    let joinPoint: (~doc: Model.Node.t, ~pos: int, ~dir: int=?, unit) => option(int);
     let insertPoint:
-      (t, ~doc: Model.Node.t, ~pos: int, ~nodeType: Model.NodeType.t) => option(int);
-    let dropPoint: (t, ~doc: Model.Node.t, ~pos: int, ~silce: Model.Slice.t) => option(int);
+      (~doc: Model.Node.t, ~pos: int, ~nodeType: Model.NodeType.t) => option(int);
+    let dropPoint: (~doc: Model.Node.t, ~pos: int, ~silce: Model.Slice.t) => option(int);
   };
 
   module Make = (M: {type t;}) : (T with type t := M.t) => {
@@ -355,7 +357,7 @@ module Transform = {
         ~range: Model.NodeRange.t,
         ~wrappers: array({
                      .
-                     "type": Model.NodeType.t,
+                     "type_": Model.NodeType.t,
                      "attrs": Model.Attrs.t,
                    })
       ) =>
@@ -394,18 +396,21 @@ module Transform = {
       t =
       "";
     [@bs.send] external join: (t, ~pos: int, ~depth: int=?, unit) => t = "";
-    [@bs.return nullable] [@bs.send]
+
+    /**
+    The following helper functions can be useful when creating transformations or determining whether they are even possible. 
+    */
+    [@bs.module "prosemirror-transform"] [@bs.return nullable] [@bs.val]
     external replaceStep:
-      (t, ~doc: Model.Node.t, ~from: int, ~to_: int=?, ~slice: Model.Slice.t=?, unit) =>
+      (~doc: Model.Node.t, ~from: int, ~to_: int=?, ~slice: Model.Slice.t=?, unit) =>
       option(Step.t) =
       "";
-    [@bs.return nullable] [@bs.send]
-    external liftTarget: (t, ~range: Model.NodeRange.t) => option(int) = "";
+    [@bs.module "prosemirror-transform"] [@bs.return nullable] [@bs.val]
+    external liftTarget: (~range: Model.NodeRange.t) => option(int) = "";
 
-    [@bs.return nullable] [@bs.send]
+    [@bs.module "prosemirror-transform"] [@bs.return nullable] [@bs.val]
     external findWrapping:
       (
-        t,
         ~range: Model.NodeRange.t,
         ~nodeType: Model.NodeType.t,
         ~attrs: Model.Attrs.t=?,
@@ -420,10 +425,9 @@ module Transform = {
         }),
       ) =
       "";
-    [@bs.send]
+    [@bs.module "prosemirror-transform"] [@bs.val]
     external canSplit:
       (
-        t,
         ~doc: Model.Node.t,
         ~pos: int,
         ~depth: int=?,
@@ -436,15 +440,15 @@ module Transform = {
       ) =>
       bool =
       "";
-    [@bs.send] external canJoin: (t, ~doc: Model.Node.t, ~pos: int) => bool = "";
-    [@bs.return nullable] [@bs.send]
-    external joinPoint: (t, ~doc: Model.Node.t, ~pos: int, ~dir: int=?, unit) => option(int) = "";
-    [@bs.return nullable] [@bs.send]
+    [@bs.module "prosemirror-transform"] [@bs.val] external canJoin: (~doc: Model.Node.t, ~pos: int) => bool = "";
+    [@bs.module "prosemirror-transform"] [@bs.return nullable] [@bs.val]
+    external joinPoint: (~doc: Model.Node.t, ~pos: int, ~dir: int=?, unit) => option(int) = "";
+    [@bs.module "prosemirror-transform"] [@bs.return nullable] [@bs.val]
     external insertPoint:
-      (t, ~doc: Model.Node.t, ~pos: int, ~nodeType: Model.NodeType.t) => option(int) =
+      (~doc: Model.Node.t, ~pos: int, ~nodeType: Model.NodeType.t) => option(int) =
       "";
-    [@bs.return nullable] [@bs.send]
-    external dropPoint: (t, ~doc: Model.Node.t, ~pos: int, ~silce: Model.Slice.t) => option(int) =
+    [@bs.module "prosemirror-transform"] [@bs.return nullable] [@bs.val]
+    external dropPoint: (~doc: Model.Node.t, ~pos: int, ~silce: Model.Slice.t) => option(int) =
       "";
   };
 

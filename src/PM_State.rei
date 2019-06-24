@@ -573,7 +573,7 @@ module Transaction: {
     The timestamp associated with this transaction, in the same format as Date.now().
     time: number
    */
-  let time: t => int;
+  let time: t => float;
 
   /**
     The stored marks set by this transaction, if any.

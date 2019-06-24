@@ -368,7 +368,7 @@ module Transaction = {
   include PM_Transform.Transform.Make({
     type nonrec t = t;
   });
-  [@bs.get] external time: t => int = "";
+  [@bs.get] external time: t => float = "";
   [@bs.return nullable] [@bs.get] external storedMarks: t => option(array(Model.Mark.t)) = "";
   [@bs.get] external selection: t => Selection.t = "";
   [@bs.send] external setSelection: (t, Selection.t) => t = "";

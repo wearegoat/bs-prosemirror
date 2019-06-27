@@ -76,7 +76,7 @@ module Mapping = {
 
   [@bs.send] external map: (t, ~pos: int, ~assoc: int=?, unit) => int = "";
   [@bs.send] external mapResult: (t, ~pos: int, ~assoc: int=?, unit) => MapResult.t = "";
-  [@bs.get] external maps: t => list(StepMap.t) = "";
+  [@bs.get] external maps: t => array(StepMap.t) = "";
   [@bs.get] external from: t => int = "";
   [@bs.get] external to_: t => int = "to";
   [@bs.send] external slice: (t, ~from: int=?, ~to_: int=?, unit) => t = "";

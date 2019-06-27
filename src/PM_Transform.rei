@@ -132,7 +132,7 @@ module Mapping: {
    The step maps in this mapping.
    maps: [StepMap]
   */
-  let maps: t => list(StepMap.t);
+  let maps: t => array(StepMap.t);
   /**
    The starting position in the maps array, used when map or mapResult is called.
    from: number

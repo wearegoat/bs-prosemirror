@@ -450,7 +450,8 @@ A plugin spec may provide a state field (under its state property) of this type,
 state it wants to keep. Functions provided here are always called with the plugin instance as their
 this binding. */
 module StateField: {
-  type t;
+
+  type t('a);
   /**
     [init] Initialize the value of the field. config will be the object passed to EditorState.create. Note that instance is a half-initialized state instance, and will not have values for plugin fields initialized after this one.
     init(config: Object, instance: EditorState) → T
@@ -467,19 +468,19 @@ module StateField: {
   let make:
     (
       ~init: (~config: EditorState.Config.t, ~instance: PM_Types.editorState) =>
-             PM_Types.editorState,
+             'a,
       ~apply: (
                 ~tr: PM_Types.transaction,
-                ~value: t,
+                ~value: 'a,
                 ~oldState: PM_Types.editorState,
                 ~newState: PM_Types.editorState
               ) =>
-              PM_Types.editorState,
-      ~toJSON: (~value: t) => Js.Json.t=?,
-      ~fromJSON: (~config: EditorState.Config.t, ~value: t, ~state: PM_Types.editorState) => t=?,
+              'a,
+      ~toJSON: (~value: 'a) => Js.Json.t=?,
+      ~fromJSON: (~config: EditorState.Config.t, ~value: Js.Json.t, ~state: PM_Types.editorState) => 'a=?,
       unit
     ) =>
-    t;
+    t('a);
 };
 
 /** This is the type passed to the Plugin constructor. It provides a definition for a plugin. */
@@ -499,7 +500,7 @@ module PluginSpec: {
     let make: (~update: update=?, ~destroy: destroy=?, unit) => t;
   };
 
-  type t;
+  type t('a);
   /**
     [props] is the view props added by this plugin. Props that are functions will be bound to have the plugin instance as their this binding.
     props: ?⁠PM_EditorProps
@@ -521,7 +522,7 @@ module PluginSpec: {
   let make:
     (
       ~props: PM_EditorProps.t=?,
-      ~state: StateField.t=?,
+      ~state: StateField.t('a)=?,
       ~key: PluginKey.t=?,
       ~view: PM_Types.editorView => View.t=?,
       ~filterTransaction: (PM_Types.transaction, PM_Types.editorState) => bool=?,
@@ -534,18 +535,18 @@ module PluginSpec: {
                             =?,
       unit
     ) =>
-    t;
+    t('a);
 };
 
 /** Plugins bundle functionality that can be added to an editor. They are part of the editor state
   and may influence that state and the view that contains it. */
 module Plugin: {
   type t = PM_Types.plugin;
-  let make: (~spec: PluginSpec.t) => t;
+  let make: (~spec: PluginSpec.t('a)) => t;
   /** The props exported by this plugin. */
   let props: t => PM_EditorProps.t;
   /** The plugin's spec object */
-  let spec: t => PluginSpec.t;
+  let spec: t => PluginSpec.t('a);
   /** Extract the plugin's state field from an editor state */
   let getState: (t, ~state: PM_Types.editorState) => Js.t({..});
 };

@@ -295,23 +295,25 @@ module PluginKey = {
 };
 
 module StateField = {
+
   [@bs.deriving abstract]
-  type t = {
-    init: (~config: EditorState.Config.t, ~instance: Types.editorState) => Types.editorState,
+  type t('a) = {
+    init: (~config: EditorState.Config.t, ~instance: Types.editorState) => 'a,
     apply:
       (
         ~tr: Types.transaction,
-        ~value: t,
+        ~value: 'a,
         ~oldState: Types.editorState,
         ~newState: Types.editorState
       ) =>
-      Types.editorState,
+      'a,
     [@bs.optional]
-    toJSON: (~value: t) => Js.Json.t,
+    toJSON: (~value: 'a) => Js.Json.t,
     [@bs.optional]
-    fromJSON: (~config: EditorState.Config.t, ~value: t, ~state: Types.editorState) => t,
+    fromJSON: (~config: EditorState.Config.t, ~value: Js.Json.t, ~state: Types.editorState) => 'a,
   };
   let make = t;
+
 };
 
 module PluginSpec = {
@@ -329,11 +331,11 @@ module PluginSpec = {
   };
 
   [@bs.deriving abstract]
-  type t = {
+  type t('a) = {
     [@bs.optional]
     props: EditorProps.t,
     [@bs.optional]
-    state: StateField.t,
+    state: StateField.t('a),
     [@bs.optional]
     key: PluginKey.t,
     [@bs.optional]
@@ -356,10 +358,10 @@ module PluginSpec = {
 module Plugin = {
   type t = Types.plugin;
 
-  [@bs.module "prosemirror-state"] [@bs.new] external make: (~spec: PluginSpec.t) => t = "Plugin";
+  [@bs.module "prosemirror-state"] [@bs.new] external make: (~spec: PluginSpec.t('a)) => t = "Plugin";
 
   [@bs.get] external props: t => EditorProps.t = "";
-  [@bs.get] external spec: t => PluginSpec.t = "";
+  [@bs.get] external spec: t => PluginSpec.t('a) = "";
   [@bs.send] external getState: (t, ~state: Types.editorState) => Js.t({..}) = "";
 };
 
@@ -368,7 +370,7 @@ module Transaction = {
   include PM_Transform.Transform.Make({
     type nonrec t = t;
   });
-  [@bs.get] external time: t => int = "";
+  [@bs.get] external time: t => float = "";
   [@bs.return nullable] [@bs.get] external storedMarks: t => option(array(Model.Mark.t)) = "";
   [@bs.get] external selection: t => Selection.t = "";
   [@bs.send] external setSelection: (t, Selection.t) => t = "";

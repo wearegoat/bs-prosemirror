@@ -132,7 +132,7 @@ module Mapping: {
    The step maps in this mapping.
    maps: [StepMap]
   */
-  let maps: t => list(StepMap.t);
+  let maps: t => array(StepMap.t);
   /**
    The starting position in the maps array, used when map or mapResult is called.
    from: number
@@ -504,7 +504,7 @@ module Transform: {
         ~wrappers: array({
                      .
                      "attrs": PM_Model.Attrs.t,
-                     "type": PM_Model.NodeType.t,
+                     "type_": PM_Model.NodeType.t,
                    })
       ) =>
       t;
@@ -579,7 +579,7 @@ module Transform: {
   replaceStep(doc: Node, from: number, to: ?⁠number = from, slice: ?⁠Slice = Slice.empty) → ?⁠Step
   */
     let replaceStep:
-      (t, ~doc: PM_Model.Node.t, ~from: int, ~to_: int=?, ~slice: PM_Model.Slice.t=?, unit) =>
+      (~doc: PM_Model.Node.t, ~from: int, ~to_: int=?, ~slice: PM_Model.Slice.t=?, unit) =>
       option(Step.t);
 
     /**
@@ -587,7 +587,7 @@ module Transform: {
   across isolating parent nodes.
   liftTarget(range: NodeRange) → ?⁠number
   */
-    let liftTarget: (t, ~range: PM_Model.NodeRange.t) => option(int);
+    let liftTarget: (~range: PM_Model.NodeRange.t) => option(int);
 
     /**
   Try to find a valid way to wrap the content in the given range in a node of the given type. May
@@ -598,7 +598,6 @@ module Transform: {
   */
     let findWrapping:
       (
-        t,
         ~range: PM_Model.NodeRange.t,
         ~nodeType: PM_Model.NodeType.t,
         ~attrs: PM_Model.Attrs.t=?,
@@ -619,7 +618,6 @@ module Transform: {
   */
     let canSplit:
       (
-        t,
         ~doc: PM_Model.Node.t,
         ~pos: int,
         ~depth: int=?,
@@ -635,26 +633,26 @@ module Transform: {
   Test whether the blocks before and after a given position can be joined.
   canJoin(doc: Node, pos: number) → bool
   */
-    let canJoin: (t, ~doc: PM_Model.Node.t, ~pos: int) => bool;
+    let canJoin: (~doc: PM_Model.Node.t, ~pos: int) => bool;
 
     /**
   Find an ancestor of the given position that can be joined to the block before (or after if dir is positive). Returns the joinable point, if any.
   joinPoint(doc: Node, pos: number, dir: ?⁠number = -1) → ?⁠number
   */
-    let joinPoint: (t, ~doc: PM_Model.Node.t, ~pos: int, ~dir: int=?, unit) => option(int);
+    let joinPoint: (~doc: PM_Model.Node.t, ~pos: int, ~dir: int=?, unit) => option(int);
 
     /**
   Try to find a point where a node of the given type can be inserted near pos, by searching up the node hierarchy when pos itself isn't a valid place but is at the start or end of a node. Return null if no position was found.
   insertPoint(doc: Node, pos: number, nodeType: NodeType) → ?⁠number
   */
     let insertPoint:
-      (t, ~doc: PM_Model.Node.t, ~pos: int, ~nodeType: PM_Model.NodeType.t) => option(int);
+      (~doc: PM_Model.Node.t, ~pos: int, ~nodeType: PM_Model.NodeType.t) => option(int);
 
     /**
   Finds a position at or around the given position where the given slice can be inserted. Will look at parent nodes' nearest boundary and try there, even if the original position wasn't directly at the start or end of that node. Returns null when no position was found.
   dropPoint(doc: Node, pos: number, slice: Slice) → ?⁠number
   */
-    let dropPoint: (t, ~doc: PM_Model.Node.t, ~pos: int, ~silce: PM_Model.Slice.t) => option(int);
+    let dropPoint: (~doc: PM_Model.Node.t, ~pos: int, ~silce: PM_Model.Slice.t) => option(int);
   };
   module Make: (M: {type t;}) => T with type t := M.t;
   type t;

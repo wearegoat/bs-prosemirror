@@ -240,7 +240,7 @@ module TextSelection: {
     Returns a resolved position if this is a cursor selection (an empty text selection), and null otherwise.
     $cursor: ?⁠ResolvedPos
    */
-  let resolvedCursor: t => PM_Model.ResolvedPos.t;
+  let resolvedCursor: t => option(PM_Model.ResolvedPos.t);
 
   /**
     Construct a text selection between the given points.
@@ -281,8 +281,7 @@ module NodeSelection: {
     Create a node selection. Does not verify the validity of its argument.
     new NodeSelection($pos: ResolvedPos)
    */
-  let make:
-    (~resolvedAnchor: PM_Model.ResolvedPos.t, ~resolvedHead: PM_Model.ResolvedPos.t, unit) => t;
+  let make: PM_Model.ResolvedPos.t => t;
 
   /**
     The selected node.
@@ -300,7 +299,7 @@ module NodeSelection: {
     Determines whether the given node may be selected as a node selection.
     static isSelectable(node: Node) → bool
    */
-  let isSelectable: (~node: PM_Model.Node.t) => bool;
+  let isSelectable: PM_Model.Node.t => bool;
 
   let fromSelection: PM_Types.selection => option(PM_Types.nodeSelection);
 };
@@ -408,13 +407,13 @@ module EditorState: {
     Serialize this state to JSON. If you want to serialize the state of plugins, pass an object mapping property names to use in the resulting JSON object to plugin objects. The argument may also be a string or number, in which case it is ignored, to support the way JSON.stringify calls toString methods.
     toJSON(pluginFields: ?⁠Object<Plugin> | string | number) → Object
    */
-  let toJSON:
-    (
-      t,
-      ~pluginFields: [ | `Int(int) | `Plugins(Js.Dict.t(PM_Types.plugin)) | `String(string)]=?,
-      unit
-    ) =>
-    Js.Json.t;
+  let toJSONWithPluginFields: (t, Js.Dict.t(PM_Types.plugin)) => Js.Json.t;
+
+  /**
+  The `space` argument is equivalent to the same argument
+  in [JSON.stringify](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#Syntax)
+  */
+  let toJSON: (t, ~space: [ | `String(string) | `Int(int)]=?, unit) => Js.Json.t;
 
   /**
     Create a new state.
@@ -430,19 +429,18 @@ module EditorState: {
     (~config: Config.t, ~json: Js.Json.t, ~pluginFields: Js.Dict.t(PM_Types.plugin)=?, unit) => t;
 };
 
-
 module PluginKey: {
-  type t;
+  type t('a);
 
   /** Create a plugin key. */
-  let make: (~name: string=?, unit) => t;
+  let make: (~name: string=?, unit) => t('a);
 
   /** Get the active plugin with this key, if any, from an editor state. */
 
-  let get: (t, PM_Types.editorState) => option(PM_Types.plugin);
+  let get: (t('a), PM_Types.editorState) => option(PM_Types.plugin);
 
   /** Get the plugin's state from an editor state. */
-  let getState: (t, PM_Types.editorState) => option(Js.t({..}));
+  let getState: (t('a), PM_Types.editorState) => option('a);
 };
 
 /**
@@ -450,7 +448,6 @@ A plugin spec may provide a state field (under its state property) of this type,
 state it wants to keep. Functions provided here are always called with the plugin instance as their
 this binding. */
 module StateField: {
-
   type t('a);
   /**
     [init] Initialize the value of the field. config will be the object passed to EditorState.create. Note that instance is a half-initialized state instance, and will not have values for plugin fields initialized after this one.
@@ -467,8 +464,7 @@ module StateField: {
    */
   let make:
     (
-      ~init: (~config: EditorState.Config.t, ~instance: PM_Types.editorState) =>
-             'a,
+      ~init: (~config: EditorState.Config.t, ~instance: PM_Types.editorState) => 'a,
       ~apply: (
                 ~tr: PM_Types.transaction,
                 ~value: 'a,
@@ -477,7 +473,13 @@ module StateField: {
               ) =>
               'a,
       ~toJSON: (~value: 'a) => Js.Json.t=?,
-      ~fromJSON: (~config: EditorState.Config.t, ~value: Js.Json.t, ~state: PM_Types.editorState) => 'a=?,
+      ~fromJSON: (
+                   ~config: EditorState.Config.t,
+                   ~value: Js.Json.t,
+                   ~state: PM_Types.editorState
+                 ) =>
+                 'a
+                   =?,
       unit
     ) =>
     t('a);
@@ -523,7 +525,7 @@ module PluginSpec: {
     (
       ~props: PM_EditorProps.t=?,
       ~state: StateField.t('a)=?,
-      ~key: PluginKey.t=?,
+      ~key: PluginKey.t('a)=?,
       ~view: PM_Types.editorView => View.t=?,
       ~filterTransaction: (PM_Types.transaction, PM_Types.editorState) => bool=?,
       ~appendTransaction: (
@@ -541,14 +543,14 @@ module PluginSpec: {
 /** Plugins bundle functionality that can be added to an editor. They are part of the editor state
   and may influence that state and the view that contains it. */
 module Plugin: {
-  type t = PM_Types.plugin;
-  let make: (~spec: PluginSpec.t('a)) => t;
+  type t('a) = PM_Types.plugin;
+  let make: (~spec: PluginSpec.t('a)) => t('a);
   /** The props exported by this plugin. */
-  let props: t => PM_EditorProps.t;
+  let props: t('a) => PM_EditorProps.t;
   /** The plugin's spec object */
-  let spec: t => PluginSpec.t('a);
+  let spec: t('a) => PluginSpec.t('a);
   /** Extract the plugin's state field from an editor state */
-  let getState: (t, ~state: PM_Types.editorState) => Js.t({..});
+  let getState: (t('a), ~state: PM_Types.editorState) => 'a;
 };
 
 /**
@@ -668,13 +670,14 @@ module Transaction: {
   let setMeta:
     (
       t,
-      ~key: [ | `Plugin(Plugin.t) | `PluginKey(PluginKey.t) | `String(string)],
-      ~value: Js.t({..})
+      ~key: [ | `Plugin(Plugin.t('a)) | `PluginKey(PluginKey.t('a)) | `String(string)],
+      ~value: 'a
     ) =>
     t;
 
   let getMeta:
-    (t, ~key: [ | `Plugin(Plugin.t) | `PluginKey(PluginKey.t) | `String(string)]) => Js.t({..});
+    (t, ~key: [ | `Plugin(Plugin.t('a)) | `PluginKey(PluginKey.t('a)) | `String(string)]) =>
+    option('a);
   /**
     Returns true if this transaction doesn't contain any metadata, and can thus safely be extended.
     isGeneric: bool

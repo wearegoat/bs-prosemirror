@@ -169,7 +169,8 @@ module TextSelection = {
     type nonrec t = t;
   });
 
-  [@bs.send] external resolvedCursor: t => Model.ResolvedPos.t = "$cursor";
+  [@bs.get] [@bs.return nullable]
+  external resolvedCursor: t => option(Model.ResolvedPos.t) = "$cursor";
 
   [@bs.module "prosemirror-state"] [@bs.new]
   external make:
@@ -198,9 +199,7 @@ module NodeSelection = {
     type nonrec t = t;
   });
   [@bs.module "prosemirror-state"] [@bs.new]
-  external make:
-    (~resolvedAnchor: Model.ResolvedPos.t, ~resolvedHead: Model.ResolvedPos.t, unit) => t =
-    "NodeSelection";
+  external make: Model.ResolvedPos.t => t = "NodeSelection";
 
   [@bs.get] external node: t => Model.Node.t = "";
 
@@ -208,7 +207,7 @@ module NodeSelection = {
   external create: (~doc: Model.Node.t, ~from: int) => t = "";
 
   [@bs.module "prosemirror-state"] [@bs.scope "NodeSelection"]
-  external isSelectable: (~node: Model.Node.t) => bool = "";
+  external isSelectable: Model.Node.t => bool = "";
 
   let fromSelection = SelectionKind.selectionToNodeSelection;
 };
@@ -260,20 +259,18 @@ module EditorState = {
     "";
   [@bs.get] external tr: t => Types.transaction = "";
   [@bs.send] external reconfigure: (t, Config.t) => t = "";
+
+  [@bs.send] external toJSONWithPluginFields: (t, Js.Dict.t(Types.plugin)) => Js.Json.t = "";
+
+  /**
+  The `space` argument is equivalent to the same argument
+  in [JSON.stringify](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#Syntax)
+  */
   [@bs.send]
   external toJSON:
-    (
-      t,
-      ~pluginFields: [@bs.unwrap] [
-                       | `Plugins(Js.Dict.t(Types.plugin))
-                       | `String(string)
-                       | `Int(int)
-                     ]
-                       =?,
-      unit
-    ) =>
-    Js.Json.t =
+    (t, ~space: [@bs.unwrap] [ | `String(string) | `Int(int)]=?, unit) => Js.Json.t =
     "";
+
   [@bs.module "prosemirror-state"] [@bs.scope "EditorState"] external create: Config.t => t = "";
   [@bs.module "prosemirror-state"] [@bs.scope "EditorState"]
   external fromJSON:
@@ -283,19 +280,18 @@ module EditorState = {
 };
 
 module PluginKey = {
-  type t;
+  type t('a);
 
   [@bs.module "prosemirror-state"] [@bs.new]
-  external make: (~name: string=?, unit) => t = "PluginKey";
+  external make: (~name: string=?, unit) => t('a) = "PluginKey";
 
   [@bs.return nullable] [@bs.send]
-  external get: (t, Types.editorState) => option(Types.plugin) = "";
+  external get: (t('a), Types.editorState) => option(Types.plugin) = "";
 
-  [@bs.send] external getState: (t, Types.editorState) => option(Js.t({..})) = "";
+  [@bs.send] external getState: (t('a), Types.editorState) => option('a) = "";
 };
 
 module StateField = {
-
   [@bs.deriving abstract]
   type t('a) = {
     init: (~config: EditorState.Config.t, ~instance: Types.editorState) => 'a,
@@ -313,7 +309,6 @@ module StateField = {
     fromJSON: (~config: EditorState.Config.t, ~value: Js.Json.t, ~state: Types.editorState) => 'a,
   };
   let make = t;
-
 };
 
 module PluginSpec = {
@@ -337,7 +332,7 @@ module PluginSpec = {
     [@bs.optional]
     state: StateField.t('a),
     [@bs.optional]
-    key: PluginKey.t,
+    key: PluginKey.t('a),
     [@bs.optional]
     view: Types.editorView => View.t,
     [@bs.optional]
@@ -356,13 +351,14 @@ module PluginSpec = {
 };
 
 module Plugin = {
-  type t = Types.plugin;
+  type t('a) = Types.plugin;
 
-  [@bs.module "prosemirror-state"] [@bs.new] external make: (~spec: PluginSpec.t('a)) => t = "Plugin";
+  [@bs.module "prosemirror-state"] [@bs.new]
+  external make: (~spec: PluginSpec.t('a)) => t('a) = "Plugin";
 
-  [@bs.get] external props: t => EditorProps.t = "";
-  [@bs.get] external spec: t => PluginSpec.t('a) = "";
-  [@bs.send] external getState: (t, ~state: Types.editorState) => Js.t({..}) = "";
+  [@bs.get] external props: t('a) => EditorProps.t = "";
+  [@bs.get] external spec: t('a) => PluginSpec.t('a) = "";
+  [@bs.send] external getState: (t('a), ~state: Types.editorState) => 'a = "";
 };
 
 module Transaction = {
@@ -394,18 +390,26 @@ module Transaction = {
   external setMeta:
     (
       t,
-      ~key: [@bs.unwrap] [ | `String(string) | `Plugin(Plugin.t) | `PluginKey(PluginKey.t)],
-      ~value: Js.t({..})
+      ~key: [@bs.unwrap] [
+              | `String(string)
+              | `Plugin(Plugin.t('a))
+              | `PluginKey(PluginKey.t('a))
+            ],
+      ~value: 'a
     ) =>
     t =
     "";
-  [@bs.send]
+  [@bs.send] [@bs.return nullable]
   external getMeta:
     (
       t,
-      ~key: [@bs.unwrap] [ | `String(string) | `Plugin(Plugin.t) | `PluginKey(PluginKey.t)]
+      ~key: [@bs.unwrap] [
+              | `String(string)
+              | `Plugin(Plugin.t('a))
+              | `PluginKey(PluginKey.t('a))
+            ]
     ) =>
-    Js.t({..}) =
+    option('a) =
     "";
   [@bs.get] external isGeneric: t => bool = "";
   [@bs.send] external scrollIntoView: t => t = "";

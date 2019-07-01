@@ -6,6 +6,8 @@ module Decoration = PM_Decoration;
 
 module NodeView = PM_NodeView;
 
+type t = PM_Types.editorView;
+
 module DecorationSet = {
   type t;
 
@@ -37,7 +39,6 @@ module DecorationSet = {
 
   [@bs.send] external remove: (t, ~decorations: array(Decoration.t)) => t = "";
 };
-
 
 module DirectEditorProps = {
   type pos = {
@@ -158,12 +159,15 @@ module DirectEditorProps = {
   };
 };
 
-type t = PM_Types.editorView;
-
 [@bs.module "prosemirror-view"] [@bs.new]
 external make:
   ([@bs.unwrap] [ | `Node(Dom.element) | `Fn(Dom.node => unit)], DirectEditorProps.t) => t =
   "EditorView";
+
+[@bs.module "prosemirror-view"] [@bs.new]
+external makeWithNullExt: (Js.Nullable.t(unit), DirectEditorProps.t) => t = "EditorView";
+
+let makeWithNull = makeWithNullExt(Js.Nullable.null);
 
 [@bs.get] external state: t => PM_State.EditorState.t = "";
 
@@ -228,14 +232,15 @@ external domAtPos:
   (t, int) =>
   {
     .
-    "dom": Dom.node,
+    "node": Dom.node,
     "offset": int,
   } =
   "";
 
 [@bs.send] [@bs.return nullable] external nodeDOM: (t, int) => option(Dom.node) = "";
 
-[@bs.send] external posAtDOM: (t, ~node: Dom.node, ~offset: int, ~bias: int=?, unit) => int = "";
+[@bs.send]
+external posAtDOM: (t, ~node: Dom.element, ~offset: int, ~bias: int=?, unit) => int = "";
 
 [@bs.send]
 external endOfTextblock:

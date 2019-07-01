@@ -61,6 +61,12 @@ typings/
 .next
 
 lib
+
+# Reason 
 .merlin
 dist
 .cache
+.DS_Store
+.bsb.lock
+/lib/bs/
+**/*.bs.js

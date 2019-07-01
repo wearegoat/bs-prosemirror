@@ -1,4 +1,6 @@
 open Belt;
+module PM = BsProsemirror;
+module PMPlugins = BsProsemirrorPlugins;
 module SchemaBasic = PM.SchemaBasic;
 module EditorState = PM.State.EditorState;
 module Model = PM.Model;

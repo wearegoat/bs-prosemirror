@@ -242,7 +242,8 @@ module Transform = {
     let join: (t, ~pos: int, ~depth: int=?, unit) => t;
 
     /**
-    The following helper functions can be useful when creating transformations or determining whether they are even possible. 
+    The following helper functions can be useful when creating transformations or determining whether they are even
+possible.
     */
     let replaceStep:
       (~doc: Model.Node.t, ~from: int, ~to_: int=?, ~slice: Model.Slice.t=?, unit) =>
@@ -279,8 +280,7 @@ module Transform = {
       bool;
     let canJoin: (~doc: Model.Node.t, ~pos: int) => bool;
     let joinPoint: (~doc: Model.Node.t, ~pos: int, ~dir: int=?, unit) => option(int);
-    let insertPoint:
-      (~doc: Model.Node.t, ~pos: int, ~nodeType: Model.NodeType.t) => option(int);
+    let insertPoint: (~doc: Model.Node.t, ~pos: int, ~nodeType: Model.NodeType.t) => option(int);
     let dropPoint: (~doc: Model.Node.t, ~pos: int, ~silce: Model.Slice.t) => option(int);
   };
 
@@ -396,9 +396,8 @@ module Transform = {
       t =
       "";
     [@bs.send] external join: (t, ~pos: int, ~depth: int=?, unit) => t = "";
-
     /**
-    The following helper functions can be useful when creating transformations or determining whether they are even possible. 
+    The following helper functions can be useful when creating transformations or determining whether they are even possible.
     */
     [@bs.module "prosemirror-transform"] [@bs.return nullable] [@bs.val]
     external replaceStep:
@@ -440,13 +439,15 @@ module Transform = {
       ) =>
       bool =
       "";
-    [@bs.module "prosemirror-transform"] [@bs.val] external canJoin: (~doc: Model.Node.t, ~pos: int) => bool = "";
+    [@bs.module "prosemirror-transform"] [@bs.val]
+    external canJoin: (~doc: Model.Node.t, ~pos: int) => bool = "";
     [@bs.module "prosemirror-transform"] [@bs.return nullable] [@bs.val]
     external joinPoint: (~doc: Model.Node.t, ~pos: int, ~dir: int=?, unit) => option(int) = "";
     [@bs.module "prosemirror-transform"] [@bs.return nullable] [@bs.val]
     external insertPoint:
       (~doc: Model.Node.t, ~pos: int, ~nodeType: Model.NodeType.t) => option(int) =
       "";
+
     [@bs.module "prosemirror-transform"] [@bs.return nullable] [@bs.val]
     external dropPoint: (~doc: Model.Node.t, ~pos: int, ~silce: Model.Slice.t) => option(int) =
       "";

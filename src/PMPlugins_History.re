@@ -19,4 +19,4 @@ type config = {
 };
 
 [@bs.module "prosemirror-history"]
-external history: (~config: config=?, unit) => PM_State.Plugin.t = "";
+external history: (~config: config=?, unit) => PM_State.Plugin.t('a) = "";

@@ -494,8 +494,8 @@ module ResolvedPos = {
   [@bs.send] external before: t => int = "";
   [@bs.send] external after: t => int = "";
   [@bs.get] external textOffset: t => int = "";
-  [@bs.return nullable] [@bs.send] external nodeAfter: t => option(Types.node) = "";
-  [@bs.return nullable] [@bs.send] external nodeBefore: t => option(Types.node) = "";
+  [@bs.return nullable] [@bs.get] external nodeAfter: t => option(Types.node) = "";
+  [@bs.return nullable] [@bs.get] external nodeBefore: t => option(Types.node) = "";
   [@bs.send] external marks: t => array(Types.mark) = "";
   [@bs.return nullable] [@bs.send]
   external marksAcross: (t, ~resolvedEnd: t) => option(array(Types.mark)) = "";

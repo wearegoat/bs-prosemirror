@@ -21,9 +21,9 @@ external make:
   "";
 
 [@bs.module "prosemirror-inputrules"]
-external inputRulesExt: {. "rules": array(t)} => PM_State.Plugin.t = "inputRules";
+external inputRulesExt: {. "rules": array(t)} => PM_State.Plugin.t('a) = "inputRules";
 
-let inputRules: array(t) => PM_State.Plugin.t = xs => inputRulesExt({"rules": xs});
+let inputRules: array(t) => PM_State.Plugin.t('a) = xs => inputRulesExt({"rules": xs});
 
 [@bs.module "prosemirror-inputrules"] external undoInputRule: PM_Command.t = "undoInputRule";
 

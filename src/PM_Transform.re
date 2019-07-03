@@ -3,8 +3,8 @@ module Types = PM_Types;
 
 module MapResult = {
   type t;
-  [@bs.get] external pos: t => int = "";
-  [@bs.get] external deleted: t => bool = "";
+  [@bs.get] external pos: t => int = "pos";
+  [@bs.get] external deleted: t => bool = "deleted";
 };
 
 module type MAPPABLE = {
@@ -29,8 +29,9 @@ module type MAPPABLE = {
 module Mappable = {
   module Make = (M: {type t;}) => {
     type t = M.t;
-    [@bs.send] external map: (t, ~pos: int, ~assoc: int=?, unit) => int = "";
-    [@bs.send] external mapResult: (t, ~pos: int, ~assoc: int=?, unit) => MapResult.t = "";
+    [@bs.send] external map: (t, ~pos: int, ~assoc: int=?, unit) => int = "map";
+    [@bs.send]
+    external mapResult: (t, ~pos: int, ~assoc: int=?, unit) => MapResult.t = "mapResult";
   };
 };
 
@@ -42,28 +43,30 @@ module StepMap = {
   [@bs.module "prosemirror-transform"] [@bs.new]
   external make: (~ranges: array(int)) => t = "StepMap";
 
-  [@bs.send] external map: (t, ~pos: int, ~assoc: int=?, unit) => int = "";
-  [@bs.send] external mapResult: (t, ~pos: int, ~assoc: int=?, unit) => MapResult.t = "";
+  [@bs.send] external map: (t, ~pos: int, ~assoc: int=?, unit) => int = "map";
+  [@bs.send] external mapResult: (t, ~pos: int, ~assoc: int=?, unit) => MapResult.t = "mapResult";
 
   [@bs.send]
   external forEach:
     (t, ~fn: (~oldStart: int, ~oldEnd: int, ~newStart: int, ~newEnd: int) => unit) => unit =
-    "";
-  [@bs.send] external invert: t => unit = "";
+    "forEach";
+  [@bs.send] external invert: t => unit = "invert";
 
-  [@bs.module "prosemirror-transform"] [@bs.scope "StepMap"] external offset: (~n: int) => t = "";
+  [@bs.module "prosemirror-transform"] [@bs.scope "StepMap"]
+  external offset: (~n: int) => t = "offset";
 };
 
 module StepResult = {
   type t;
-  [@bs.get] external doc: t => Types.node = "";
-  [@bs.return nullable] [@bs.get] external failed: t => option(string) = "";
+  [@bs.get] external doc: t => Types.node = "doc";
+  [@bs.return nullable] [@bs.get] external failed: t => option(string) = "failed";
   [@bs.module "prosemirror-transform"] [@bs.scope "StepResult"]
-  external ok: (~doc: Types.node) => t = "";
+  external ok: (~doc: Types.node) => t = "ok";
   [@bs.module "prosemirror-transform"] [@bs.scope "StepResult"]
-  external fail: (~message: string) => t = "";
+  external fail: (~message: string) => t = "fail";
   [@bs.module "prosemirror-transform"] [@bs.scope "StepResult"]
-  external fromReplace: (~doc: Types.node, ~from: int, ~to_: int, ~slice: Model.Slice.t) => t = "";
+  external fromReplace: (~doc: Types.node, ~from: int, ~to_: int, ~slice: Model.Slice.t) => t =
+    "fromReplace";
 };
 
 module Mapping = {
@@ -74,28 +77,29 @@ module Mapping = {
   [@bs.module "prosemirror-transform"] [@bs.new]
   external make: (~maps: array(StepMap.t)=?, unit) => t = "Mapping";
 
-  [@bs.send] external map: (t, ~pos: int, ~assoc: int=?, unit) => int = "";
-  [@bs.send] external mapResult: (t, ~pos: int, ~assoc: int=?, unit) => MapResult.t = "";
-  [@bs.get] external maps: t => array(StepMap.t) = "";
-  [@bs.get] external from: t => int = "";
+  [@bs.send] external map: (t, ~pos: int, ~assoc: int=?, unit) => int = "map";
+  [@bs.send] external mapResult: (t, ~pos: int, ~assoc: int=?, unit) => MapResult.t = "mapResult";
+  [@bs.get] external maps: t => array(StepMap.t) = "maps";
+  [@bs.get] external from: t => int = "from";
   [@bs.get] external to_: t => int = "to";
-  [@bs.send] external slice: (t, ~from: int=?, ~to_: int=?, unit) => t = "";
-  [@bs.send] external appendMap: (t, ~map: StepMap.t, ~mirrors: int=?, unit) => unit = "";
-  [@bs.send] external appendMapping: (t, ~mapping: t) => unit = "";
-  [@bs.return nullable] [@bs.send] external getMirror: (t, ~number: int) => option(int) = "";
-  [@bs.send] external appendMappingInverted: (t, ~mapping: t) => unit = "";
+  [@bs.send] external slice: (t, ~from: int=?, ~to_: int=?, unit) => t = "slice";
+  [@bs.send] external appendMap: (t, ~map: StepMap.t, ~mirrors: int=?, unit) => unit = "appendMap";
+  [@bs.send] external appendMapping: (t, ~mapping: t) => unit = "appendMapping";
+  [@bs.return nullable] [@bs.send]
+  external getMirror: (t, ~number: int) => option(int) = "getMirror";
+  [@bs.send] external appendMappingInverted: (t, ~mapping: t) => unit = "appendMappingInverted";
 };
 
 module Step = {
   type t;
-  [@bs.send] external apply: (t, ~doc: Types.node) => StepResult.t = "";
-  [@bs.send] external getMap: t => StepMap.t = "";
-  [@bs.send] external invert: (t, ~doc: Types.node) => t = "";
-  [@bs.return nullable] [@bs.send] external map: (t, ~mapping: Mapping.t) => option(t) = "";
-  [@bs.return nullable] [@bs.send] external merge: (t, ~other: t) => option(t) = "";
-  [@bs.send] external toJSON: t => Js.Json.t = "";
+  [@bs.send] external apply: (t, ~doc: Types.node) => StepResult.t = "apply";
+  [@bs.send] external getMap: t => StepMap.t = "getMap";
+  [@bs.send] external invert: (t, ~doc: Types.node) => t = "invert";
+  [@bs.return nullable] [@bs.send] external map: (t, ~mapping: Mapping.t) => option(t) = "map";
+  [@bs.return nullable] [@bs.send] external merge: (t, ~other: t) => option(t) = "merge";
+  [@bs.send] external toJSON: t => Js.Json.t = "toJSON";
   [@bs.module "prosemirror-transform"] [@bs.scope "Step"]
-  external fromJSON: (Model.Schema.t, Js.Json.t) => t = "";
+  external fromJSON: (Model.Schema.t, Js.Json.t) => t = "fromJSON";
   /* REMINDER -> The type of stepClass is constructor<Step> however I am not sure how to model that
 
       static jsonID(id: string, selectionClass: constructor<Selection>)
@@ -104,7 +108,7 @@ module Step = {
       Try to pick something that's unlikely to clash with classes from other modules.
      */
   [@bs.module "prosemirror-transform"] [@bs.scope "Step"]
-  external jsonID: (~id: string, ~stepClass: t) => t = "";
+  external jsonID: (~id: string, ~stepClass: t) => t = "jsonID";
 };
 
 module AddMarkStep = {
@@ -290,15 +294,15 @@ possible.
     [@bs.module "prosemirror-transform"] [@bs.new]
     external make: (~doc: Model.Node.t) => t = "Transform";
 
-    [@bs.get] external doc: t => Model.Node.t = "";
-    [@bs.get] external steps: t => array(Step.t) = "";
-    [@bs.get] external docs: t => array(Model.Node.t) = "";
-    [@bs.get] external mapping: t => Mapping.t = "";
-    [@bs.get] external before: t => Model.Node.t = "";
-    [@bs.send] external step: (t, ~step: Step.t) => Step.t = "";
-    [@bs.send] external maybeStep: (t, ~step: Step.t) => StepResult.t = "";
-    [@bs.get] external docChanged: t => bool = "";
-    [@bs.send] external addMark: (t, ~from: int, ~to_: int, ~mark: Model.Mark.t) => t = "";
+    [@bs.get] external doc: t => Model.Node.t = "doc";
+    [@bs.get] external steps: t => array(Step.t) = "steps";
+    [@bs.get] external docs: t => array(Model.Node.t) = "docs";
+    [@bs.get] external mapping: t => Mapping.t = "mapping";
+    [@bs.get] external before: t => Model.Node.t = "before";
+    [@bs.send] external step: (t, ~step: Step.t) => Step.t = "step";
+    [@bs.send] external maybeStep: (t, ~step: Step.t) => StepResult.t = "maybeStep";
+    [@bs.get] external docChanged: t => bool = "docChanged";
+    [@bs.send] external addMark: (t, ~from: int, ~to_: int, ~mark: Model.Mark.t) => t = "addMark";
     [@bs.send]
     external removeMark:
       (
@@ -309,13 +313,13 @@ possible.
         unit
       ) =>
       t =
-      "";
+      "removeMark";
     [@bs.send]
     external clearIncompatible:
       (t, ~pos: int, ~parentType: Model.NodeType.t, ~match: Model.ContentMatch.t=?, unit) => t =
-      "";
+      "clearIncompatible";
     [@bs.send]
-    external replace: (t, ~from: int, ~to_: int=?, ~slice: Model.Slice.t=?, unit) => t = "";
+    external replace: (t, ~from: int, ~to_: int=?, ~slice: Model.Slice.t=?, unit) => t = ", ";
 
     [@bs.send]
     external replaceWith:
@@ -330,8 +334,8 @@ possible.
                   ]
       ) =>
       t =
-      "";
-    [@bs.send] external delete: (t, ~from: int, ~to_: int) => t = "";
+      "replaceWith";
+    [@bs.send] external delete: (t, ~from: int, ~to_: int) => t = "delete";
     [@bs.send]
     external insert:
       (
@@ -344,12 +348,14 @@ possible.
                   ]
       ) =>
       t =
-      "";
-    [@bs.send] external replaceRange: (t, ~from: int, ~to_: int, ~slice: Model.Slice.t) => t = "";
+      "insert";
     [@bs.send]
-    external replaceRangeWith: (t, ~from: int, ~to_: int, ~node: Model.Node.t) => t = "";
-    [@bs.send] external deleteRange: (t, ~from: int, ~to_: int) => t = "";
-    [@bs.send] external lift: (t, ~range: Model.NodeRange.t, ~target: int) => t = "";
+    external replaceRange: (t, ~from: int, ~to_: int, ~slice: Model.Slice.t) => t = "replaceRange";
+    [@bs.send]
+    external replaceRangeWith: (t, ~from: int, ~to_: int, ~node: Model.Node.t) => t =
+      "replaceRangeWith";
+    [@bs.send] external deleteRange: (t, ~from: int, ~to_: int) => t = "deleteRange";
+    [@bs.send] external lift: (t, ~range: Model.NodeRange.t, ~target: int) => t = "lift";
     [@bs.send]
     external wrap:
       (
@@ -362,11 +368,11 @@ possible.
                    })
       ) =>
       t =
-      "";
+      "wrap";
     [@bs.send]
     external setBlockType:
       (t, ~from: int, ~to_: int=?, ~type_: Model.NodeType.t, ~attrs: Model.Attrs.t=?, unit) => t =
-      "";
+      "setBlockType";
     [@bs.send]
     external setNodeMarkup:
       (
@@ -378,7 +384,7 @@ possible.
         unit
       ) =>
       t =
-      "";
+      "setNodeMarkup";
     [@bs.send]
     external split:
       (
@@ -394,8 +400,8 @@ possible.
         unit
       ) =>
       t =
-      "";
-    [@bs.send] external join: (t, ~pos: int, ~depth: int=?, unit) => t = "";
+      "split";
+    [@bs.send] external join: (t, ~pos: int, ~depth: int=?, unit) => t = "join";
     /**
     The following helper functions can be useful when creating transformations or determining whether they are even possible.
     */
@@ -403,9 +409,9 @@ possible.
     external replaceStep:
       (~doc: Model.Node.t, ~from: int, ~to_: int=?, ~slice: Model.Slice.t=?, unit) =>
       option(Step.t) =
-      "";
+      "replaceStep";
     [@bs.module "prosemirror-transform"] [@bs.return nullable] [@bs.val]
-    external liftTarget: (~range: Model.NodeRange.t) => option(int) = "";
+    external liftTarget: (~range: Model.NodeRange.t) => option(int) = "liftTarget";
 
     [@bs.module "prosemirror-transform"] [@bs.return nullable] [@bs.val]
     external findWrapping:
@@ -423,7 +429,7 @@ possible.
           "attrs": Model.Attrs.t,
         }),
       ) =
-      "";
+      "findWrapping";
     [@bs.module "prosemirror-transform"] [@bs.val]
     external canSplit:
       (
@@ -438,19 +444,20 @@ possible.
                        =?
       ) =>
       bool =
-      "";
+      "canSplit";
     [@bs.module "prosemirror-transform"] [@bs.val]
-    external canJoin: (~doc: Model.Node.t, ~pos: int) => bool = "";
+    external canJoin: (~doc: Model.Node.t, ~pos: int) => bool = "canJoin";
     [@bs.module "prosemirror-transform"] [@bs.return nullable] [@bs.val]
-    external joinPoint: (~doc: Model.Node.t, ~pos: int, ~dir: int=?, unit) => option(int) = "";
+    external joinPoint: (~doc: Model.Node.t, ~pos: int, ~dir: int=?, unit) => option(int) =
+      "joinPoint";
     [@bs.module "prosemirror-transform"] [@bs.return nullable] [@bs.val]
     external insertPoint:
       (~doc: Model.Node.t, ~pos: int, ~nodeType: Model.NodeType.t) => option(int) =
-      "";
+      "insertPoint";
 
     [@bs.module "prosemirror-transform"] [@bs.return nullable] [@bs.val]
     external dropPoint: (~doc: Model.Node.t, ~pos: int, ~silce: Model.Slice.t) => option(int) =
-      "";
+      "dropPoint";
   };
 
   type t;

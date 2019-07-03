@@ -37,7 +37,7 @@ external widget:
     unit
   ) =>
   t =
-  "";
+  "widget";
 [@bs.deriving abstract]
 type inlineSpec = {
   [@bs.optional]
@@ -46,7 +46,8 @@ type inlineSpec = {
   inclusiveEnd: bool,
 };
 [@bs.module "prosemirror-view"] [@bs.scope "Decoration"]
-external inline: (~from: int, ~to_: int, ~attrs: Attrs.t, ~spec: inlineSpec=?, unit) => t = "";
+external inline: (~from: int, ~to_: int, ~attrs: Attrs.t, ~spec: inlineSpec=?, unit) => t =
+  "inline";
 
 [@bs.module "prosemirror-view"] [@bs.scope "Decoration"]
-external node: (~from: int, ~to_: int, ~attrs: Attrs.t, ~spec: spec=?, unit) => t = "";
+external node: (~from: int, ~to_: int, ~attrs: Attrs.t, ~spec: spec=?, unit) => t = "node";

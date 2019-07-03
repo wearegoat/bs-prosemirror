@@ -16,8 +16,8 @@ module SelectionRange = {
 
 module SelectionBookmark = {
   type t;
-  [@bs.send] external map: (t, ~mapping: Transform.Mapping.t) => t = "";
-  [@bs.send] external resolve: (t, ~doc: Model.Node.t) => Types.selection = "";
+  [@bs.send] external map: (t, ~mapping: Transform.Mapping.t) => t = "map";
+  [@bs.send] external resolve: (t, ~doc: Model.Node.t) => Types.selection = "resolve";
 };
 
 module SelectionKind = {
@@ -92,42 +92,43 @@ module Selection = {
   };
   module Make = (M: {type t;}) : (T with type t := M.t) => {
     type t = M.t;
-    [@bs.get] external ranges: t => array(SelectionRange.t) = "";
+    [@bs.get] external ranges: t => array(SelectionRange.t) = "ranges";
     [@bs.get] external resolvedAnchor: t => Model.ResolvedPos.t = "$anchor";
     [@bs.get] external resolvedHead: t => Model.ResolvedPos.t = "$head";
-    [@bs.get] external anchor: t => int = "";
-    [@bs.get] external head: t => int = "";
-    [@bs.get] external from: t => int = "";
+    [@bs.get] external anchor: t => int = "anchor";
+    [@bs.get] external head: t => int = "head";
+    [@bs.get] external from: t => int = "from";
     [@bs.get] external to_: t => int = "to";
     [@bs.get] external resolvedFrom: t => Model.ResolvedPos.t = "$from";
     [@bs.get] external resolvedTo: t => Model.ResolvedPos.t = "$to";
-    [@bs.get] external empty: t => bool = "";
-    [@bs.send] external eq: (t, t) => bool = "";
-    [@bs.send] external map: (t, ~doc: Model.Node.t, ~mapping: Transform.Mapping.t) => t = "";
-    [@bs.send] external content: t => Model.Slice.t = "";
+    [@bs.get] external empty: t => bool = "empty";
+    [@bs.send] external eq: (t, t) => bool = "eq";
+    [@bs.send] external map: (t, ~doc: Model.Node.t, ~mapping: Transform.Mapping.t) => t = "map";
+    [@bs.send] external content: t => Model.Slice.t = "content";
     [@bs.send]
-    external replace: (t, ~tr: Types.transaction, ~content: Model.Slice.t=?, unit) => unit = "";
-    [@bs.send] external replaceWith: (t, ~tr: Types.transaction, ~node: Model.Node.t) => unit = "";
-    [@bs.send] external toJSON: t => Js.Json.t = "";
-    [@bs.send] external getBookmark: t => SelectionBookmark.t = "";
-    [@bs.get] external visible: t => bool = "";
+    external replace: (t, ~tr: Types.transaction, ~content: Model.Slice.t=?, unit) => unit = ": ";
+    [@bs.send]
+    external replaceWith: (t, ~tr: Types.transaction, ~node: Model.Node.t) => unit = "replaceWith";
+    [@bs.send] external toJSON: t => Js.Json.t = "toJSON";
+    [@bs.send] external getBookmark: t => SelectionBookmark.t = "getBookmark";
+    [@bs.get] external visible: t => bool = "visible";
 
     [@bs.return nullable] [@bs.module "prosemirror-state"] [@bs.scope "Selection"]
     external findFrom:
       (~resolvedPos: Model.ResolvedPos.t, ~dir: int, ~textOnly: bool=?, unit) => option(t) =
-      "";
+      "findFrom";
 
     [@bs.return nullable] [@bs.module "prosemirror-state"] [@bs.scope "Selection"]
-    external near: (~resolvedPos: Model.ResolvedPos.t, ~bias: int=?, unit) => option(t) = "";
+    external near: (~resolvedPos: Model.ResolvedPos.t, ~bias: int=?, unit) => option(t) = "near";
 
     [@bs.module "prosemirror-state"] [@bs.scope "Selection"]
-    external atStart: (~doc: Model.Node.t) => t = "";
+    external atStart: (~doc: Model.Node.t) => t = "atStart";
 
     [@bs.module "prosemirror-state"] [@bs.scope "Selection"]
-    external atEnd: (~doc: Model.Node.t) => t = "";
+    external atEnd: (~doc: Model.Node.t) => t = "atEnd";
 
     [@bs.module "prosemirror-state"] [@bs.scope "Selection"]
-    external fromJSON: (~doc: Model.Node.t, ~json: Js.Json.t) => t = "";
+    external fromJSON: (~doc: Model.Node.t, ~json: Js.Json.t) => t = "fromJSON";
 
     /* REMINDER -> The type of stepClass is constructor<Step> however I am not sure how to model that
         Alexey: I checked a couple of "wrappers" for prosemirror. At least at this point I couldn't
@@ -138,7 +139,7 @@ module Selection = {
         Try to pick something that's unlikely to clash with classes from other modules.
        */
     [@bs.module "prosemirror-state"] [@bs.scope "Selection"]
-    external jsonID: (~id: string, ~selectionClass: t) => t = "";
+    external jsonID: (~id: string, ~selectionClass: t) => t = "jsonID";
   };
   include Make({
     type nonrec t = t;
@@ -178,7 +179,7 @@ module TextSelection = {
     "TextSelection";
 
   [@bs.module "prosemirror-state"] [@bs.scope "TextSelection"]
-  external create: (~doc: Model.Node.t, ~anchor: int, ~head: int=?, unit) => t = "";
+  external create: (~doc: Model.Node.t, ~anchor: int, ~head: int=?, unit) => t = "create";
 
   [@bs.module "prosemirror-state"] [@bs.scope "TextSelection"]
   external between:
@@ -189,7 +190,7 @@ module TextSelection = {
       unit
     ) =>
     Selection.t =
-    "";
+    "between";
   let fromSelection = SelectionKind.selectionToTextSelection;
 };
 
@@ -201,13 +202,13 @@ module NodeSelection = {
   [@bs.module "prosemirror-state"] [@bs.new]
   external make: Model.ResolvedPos.t => t = "NodeSelection";
 
-  [@bs.get] external node: t => Model.Node.t = "";
+  [@bs.get] external node: t => Model.Node.t = "external ";
 
   [@bs.module "prosemirror-state"] [@bs.scope "NodeSelection"]
-  external create: (~doc: Model.Node.t, ~from: int) => t = "";
+  external create: (~doc: Model.Node.t, ~from: int) => t = "create";
 
   [@bs.module "prosemirror-state"] [@bs.scope "NodeSelection"]
-  external isSelectable: Model.Node.t => bool = "";
+  external isSelectable: Model.Node.t => bool = "isSelectable";
 
   let fromSelection = SelectionKind.selectionToNodeSelection;
 };
@@ -242,12 +243,13 @@ module EditorState = {
     let make = t;
   };
 
-  [@bs.get] external doc: t => Model.Node.t = "";
-  [@bs.get] external selection: t => Selection.t = "";
-  [@bs.return nullable] [@bs.get] external storedMarks: t => option(array(Model.Mark.t)) = "";
-  [@bs.get] external schema: t => Model.Schema.t = "";
-  [@bs.get] external plugins: t => array(Types.plugin) = "";
-  [@bs.send] external apply: (t, Types.transaction) => t = "";
+  [@bs.get] external doc: t => Model.Node.t = "bs";
+  [@bs.get] external selection: t => Selection.t = "selection";
+  [@bs.return nullable] [@bs.get]
+  external storedMarks: t => option(array(Model.Mark.t)) = "storedMarks";
+  [@bs.get] external schema: t => Model.Schema.t = "schema";
+  [@bs.get] external plugins: t => array(Types.plugin) = "plugins";
+  [@bs.send] external apply: (t, Types.transaction) => t = "apply";
   [@bs.send]
   external applyTransaction:
     (t, Types.transaction) =>
@@ -256,11 +258,13 @@ module EditorState = {
       "state": t,
       "transactions": array(Types.transaction),
     } =
-    "";
-  [@bs.get] external tr: t => Types.transaction = "";
-  [@bs.send] external reconfigure: (t, Config.t) => t = "";
+    "applyTransaction";
+  [@bs.get] external tr: t => Types.transaction = "tr";
+  [@bs.send] external reconfigure: (t, Config.t) => t = "reconfigure";
 
-  [@bs.send] external toJSONWithPluginFields: (t, Js.Dict.t(Types.plugin)) => Js.Json.t = "";
+  [@bs.send]
+  external toJSONWithPluginFields: (t, Js.Dict.t(Types.plugin)) => Js.Json.t =
+    "toJSONWithPluginFields";
 
   /**
   The `space` argument is equivalent to the same argument
@@ -269,13 +273,14 @@ module EditorState = {
   [@bs.send]
   external toJSON:
     (t, ~space: [@bs.unwrap] [ | `String(string) | `Int(int)]=?, unit) => Js.Json.t =
-    "";
+    "toJSON";
 
-  [@bs.module "prosemirror-state"] [@bs.scope "EditorState"] external create: Config.t => t = "";
+  [@bs.module "prosemirror-state"] [@bs.scope "EditorState"]
+  external create: Config.t => t = "create";
   [@bs.module "prosemirror-state"] [@bs.scope "EditorState"]
   external fromJSON:
     (~config: Config.t, ~json: Js.Json.t, ~pluginFields: Js.Dict.t(Types.plugin)=?, unit) => t =
-    "";
+    "fromJSON";
   /* Apply the given transaction to produce a new state. */
 };
 
@@ -286,9 +291,9 @@ module PluginKey = {
   external make: (~name: string=?, unit) => t('a) = "PluginKey";
 
   [@bs.return nullable] [@bs.send]
-  external get: (t('a), Types.editorState) => option(Types.plugin) = "";
+  external get: (t('a), Types.editorState) => option(Types.plugin) = ": ";
 
-  [@bs.send] external getState: (t('a), Types.editorState) => option('a) = "";
+  [@bs.send] external getState: (t('a), Types.editorState) => option('a) = "getState";
 };
 
 module StateField = {
@@ -356,9 +361,9 @@ module Plugin = {
   [@bs.module "prosemirror-state"] [@bs.new]
   external make: (~spec: PluginSpec.t('a)) => t('a) = "Plugin";
 
-  [@bs.get] external props: t('a) => EditorProps.t = "";
-  [@bs.get] external spec: t('a) => PluginSpec.t('a) = "";
-  [@bs.send] external getState: (t('a), ~state: Types.editorState) => 'a = "";
+  [@bs.get] external props: t('a) => EditorProps.t = "props";
+  [@bs.get] external spec: t('a) => PluginSpec.t('a) = "spec";
+  [@bs.send] external getState: (t('a), ~state: Types.editorState) => 'a = "getState";
 };
 
 module Transaction = {
@@ -366,26 +371,30 @@ module Transaction = {
   include PM_Transform.Transform.Make({
     type nonrec t = t;
   });
-  [@bs.get] external time: t => float = "";
-  [@bs.return nullable] [@bs.get] external storedMarks: t => option(array(Model.Mark.t)) = "";
-  [@bs.get] external selection: t => Selection.t = "";
-  [@bs.send] external setSelection: (t, Selection.t) => t = "";
-  [@bs.get] external selectionSet: t => bool = "";
-  [@bs.send] external setStoredMarks: (t, ~marks: array(Model.Mark.t)=?, unit) => t = "";
-  [@bs.send] external addStoredMark: (t, ~mark: Model.Mark.t) => t = "";
-  [@bs.send] external ensureMarks: (t, array(PM_Model.Mark.t)) => t = "";
+  [@bs.get] external time: t => float = "time";
+  [@bs.return nullable] [@bs.get]
+  external storedMarks: t => option(array(Model.Mark.t)) = "storedMarks";
+  [@bs.get] external selection: t => Selection.t = "selection";
+  [@bs.send] external setSelection: (t, Selection.t) => t = "setSelection";
+  [@bs.get] external selectionSet: t => bool = "selectionSet";
+  [@bs.send]
+  external setStoredMarks: (t, ~marks: array(Model.Mark.t)=?, unit) => t = "setStoredMarks";
+  [@bs.send] external addStoredMark: (t, ~mark: Model.Mark.t) => t = "addStoredMark";
+  [@bs.send] external ensureMarks: (t, array(PM_Model.Mark.t)) => t = "ensureMarks";
   [@bs.send]
   external removeStoredMark:
     (t, ~markOrMarkType: [@bs.unwrap] [ | `Mark(Model.Mark.t) | `MarkType(Model.MarkType.t)]) =>
     t =
-    "";
-  [@bs.get] external storedMarksSet: t => bool = "";
-  [@bs.send] external setTime: (t, int) => t = "";
-  [@bs.send] external replaceSelection: (t, Model.Slice.t) => t = "";
+    "removeStoredMark";
+  [@bs.get] external storedMarksSet: t => bool = "storedMarksSet";
+  [@bs.send] external setTime: (t, int) => t = "setTime";
+  [@bs.send] external replaceSelection: (t, Model.Slice.t) => t = "replaceSelection";
   [@bs.send]
-  external replaceSelectionWith: (t, ~node: Model.Node.t, ~inheritMarks: bool=?, unit) => t = "";
-  [@bs.send] external deleteSelection: t => t = "";
-  [@bs.send] external insertText: (t, ~test: string, ~from: int=?, ~to_: int=?, unit) => t = "";
+  external replaceSelectionWith: (t, ~node: Model.Node.t, ~inheritMarks: bool=?, unit) => t =
+    "replaceSelectionWith";
+  [@bs.send] external deleteSelection: t => t = "deleteSelection";
+  [@bs.send]
+  external insertText: (t, ~test: string, ~from: int=?, ~to_: int=?, unit) => t = "insertText";
   [@bs.send]
   external setMeta:
     (
@@ -398,7 +407,7 @@ module Transaction = {
       ~value: 'a
     ) =>
     t =
-    "";
+    "setMeta";
   [@bs.send] [@bs.return nullable]
   external getMeta:
     (
@@ -410,7 +419,7 @@ module Transaction = {
             ]
     ) =>
     option('a) =
-    "";
-  [@bs.get] external isGeneric: t => bool = "";
-  [@bs.send] external scrollIntoView: t => t = "";
+    "getMeta";
+  [@bs.get] external isGeneric: t => bool = "external ";
+  [@bs.send] external scrollIntoView: t => t = "scrollIntoView";
 };

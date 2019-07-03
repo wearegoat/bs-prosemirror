@@ -12,15 +12,15 @@ module DecorationSet = {
   type t;
 
   [@bs.module "prosemirror-view"] [@bs.scope "DecorationSet"]
-  external create: (~doc: PM_Model.Node.t, ~decorations: array(Decoration.t)) => t = "";
+  external create: (~doc: PM_Model.Node.t, ~decorations: array(Decoration.t)) => t = "create";
 
-  [@bs.module "prosemirror-view"] [@bs.scope "DecorationSet"] external empty: t = "";
+  [@bs.module "prosemirror-view"] [@bs.scope "DecorationSet"] external empty: t = "empty";
 
   [@bs.send]
   external find:
     (t, ~start: int=?, ~end_: int=?, ~predicate: Decoration.spec => bool=?, unit) =>
     array(Decoration.t) =
-    "";
+    "find";
 
   [@bs.send]
   external map:
@@ -32,12 +32,12 @@ module DecorationSet = {
       unit
     ) =>
     t =
-    "";
+    "map";
 
   [@bs.send]
-  external add: (t, ~doc: PM_Model.Node.t, ~decorations: array(Decoration.t)) => t = "";
+  external add: (t, ~doc: PM_Model.Node.t, ~decorations: array(Decoration.t)) => t = "add";
 
-  [@bs.send] external remove: (t, ~decorations: array(Decoration.t)) => t = "";
+  [@bs.send] external remove: (t, ~decorations: array(Decoration.t)) => t = "remove";
 };
 
 module DirectEditorProps = {
@@ -169,9 +169,9 @@ external makeWithNullExt: (Js.Nullable.t(unit), DirectEditorProps.t) => t = "Edi
 
 let makeWithNull = makeWithNullExt(Js.Nullable.null);
 
-[@bs.get] external state: t => PM_State.EditorState.t = "";
+[@bs.get] external state: t => PM_State.EditorState.t = "state";
 
-[@bs.get] external dom: t => Dom.element = "";
+[@bs.get] external dom: t => Dom.element = "dom";
 
 [@bs.send] [@bs.return nullable]
 external dragging:
@@ -181,22 +181,22 @@ external dragging:
     "slice": PM_Model.Slice.t,
     "move": bool,
   }) =
-  "";
+  "dragging";
 
-[@bs.send] external props: t => DirectEditorProps.t = "";
+[@bs.send] external props: t => DirectEditorProps.t = "props";
 
-[@bs.send] external update: (t, DirectEditorProps.t) => unit = "";
+[@bs.send] external update: (t, DirectEditorProps.t) => unit = "update";
 
-[@bs.send] external setProps: (t, DirectEditorProps.t) => unit = "";
+[@bs.send] external setProps: (t, DirectEditorProps.t) => unit = "setProps";
 
 /* TODO: A better solution for props should be found */
-[@bs.send] external someProp: (t, ~propName: string, ~f: 'a => 'a) => unit = "";
+[@bs.send] external someProp: (t, ~propName: string, ~f: 'a => 'a) => unit = "someProp";
 
-[@bs.send] external hasFocus: t => bool = "";
+[@bs.send] external hasFocus: t => bool = "hasFocus";
 
-[@bs.send] external focus: t => unit = "";
+[@bs.send] external focus: t => unit = "focus";
 
-[@bs.get] external root: t => Dom.document = "";
+[@bs.get] external root: t => Dom.document = "root";
 
 [@bs.send] [@bs.return nullable]
 external posAtCoords:
@@ -213,7 +213,7 @@ external posAtCoords:
     "pos": int,
     "inside": int,
   }) =
-  "";
+  "posAtCoords";
 
 [@bs.send]
 external coordsAtPos:
@@ -225,7 +225,7 @@ external coordsAtPos:
     "top": int,
     "bottom": int,
   } =
-  "";
+  "coordsAtPos";
 
 [@bs.send]
 external domAtPos:
@@ -235,12 +235,12 @@ external domAtPos:
     "node": Dom.node,
     "offset": int,
   } =
-  "";
+  "domAtPos";
 
-[@bs.send] [@bs.return nullable] external nodeDOM: (t, int) => option(Dom.node) = "";
+[@bs.send] [@bs.return nullable] external nodeDOM: (t, int) => option(Dom.node) = "nodeDOM";
 
 [@bs.send]
-external posAtDOM: (t, ~node: Dom.element, ~offset: int, ~bias: int=?, unit) => int = "";
+external posAtDOM: (t, ~node: Dom.element, ~offset: int, ~bias: int=?, unit) => int = "posAtDOM";
 
 [@bs.send]
 external endOfTextblock:
@@ -251,12 +251,12 @@ external endOfTextblock:
     unit
   ) =>
   bool =
-  "";
+  "endOfTextblock";
 
 /* Update the editor's state prop, without touching any of the other props. */
-[@bs.send] external updateState: (t, PM_State.EditorState.t) => unit = "";
+[@bs.send] external updateState: (t, PM_State.EditorState.t) => unit = "updateState";
 
 /* Removes the editor from the DOM and destroys all node views. */
-[@bs.send] external destroy: t => unit = "";
+[@bs.send] external destroy: t => unit = "destroy";
 
-[@bs.send] external dispatch: (t, PM_State.Transaction.t) => bool = "";
+[@bs.send] external dispatch: (t, PM_State.Transaction.t) => bool = "dispatch";

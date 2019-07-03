@@ -9,7 +9,7 @@ module Command = PM_Command;
 external addListNodes:
   (~nodes: OrderedMap.t(PM_Model.NodeSpec.t), ~itemContent: string, ~listGroup: string=?, unit) =>
   OrderedMap.t(PM_Model.NodeSpec.t) =
-  "";
+  "addListNodes";
 
 [@bs.module "prosemirror-schema-list"]
 external wrapInListExt:

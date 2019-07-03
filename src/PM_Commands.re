@@ -79,10 +79,11 @@ external autoJoin:
                  ]
   ) =>
   Command.t =
-  "";
+  "autoJoin";
 
-[@bs.module "prosemirror-commands"] external baseKeymap: Js.Dict.t(Command.t) = "";
+[@bs.module "prosemirror-commands"] external baseKeymap: Js.Dict.t(Command.t) = "baseKeymap";
 
-[@bs.module "prosemirror-commands"] external pcBaseKeymap: Js.Dict.t(Command.t) = "";
+[@bs.module "prosemirror-commands"] external pcBaseKeymap: Js.Dict.t(Command.t) = "pcBaseKeymap";
 
-[@bs.module "prosemirror-commands"] external macBaseKeymap: Js.Dict.t(Command.t) = "";
+[@bs.module "prosemirror-commands"]
+external macBaseKeymap: Js.Dict.t(Command.t) = "macBaseKeymap";

@@ -664,21 +664,6 @@ module Transaction: {
   let insertText: (t, ~test: string, ~from: int=?, ~to_: int=?, unit) => t;
 
   /**
-    Store a metadata property in this transaction, keyed either by name or by plugin.
-    setMeta(key: string | Plugin | PluginKey, value: any) → Transaction
-  */
-  let setMeta:
-    (
-      t,
-      ~key: [ | `Plugin(Plugin.t('a)) | `PluginKey(PluginKey.t('a)) | `String(string)],
-      ~value: 'a
-    ) =>
-    t;
-
-  let getMeta:
-    (t, ~key: [ | `Plugin(Plugin.t('a)) | `PluginKey(PluginKey.t('a)) | `String(string)]) =>
-    option('a);
-  /**
     Returns true if this transaction doesn't contain any metadata, and can thus safely be extended.
     isGeneric: bool
    */
@@ -690,4 +675,44 @@ module Transaction: {
     scrollIntoView() → Transaction
    */
   let scrollIntoView: t => t;
+
+  module Meta : {
+    module type T = {
+
+      type v;
+
+      /**
+      Store a metadata property in this transaction, keyed either by name or by plugin.
+      setMeta(key: string | Plugin | PluginKey, value: any) → Transaction
+      */
+      let set:
+        (
+          t,
+          ~key: [
+                  | `String(string)
+                  | `Plugin(Plugin.t('a))
+                  | `PluginKey(PluginKey.t('a))
+                ],
+          ~value: v
+        ) =>
+        t;
+
+      /**
+      Retrieve a metadata property for a given name or plugin.
+      getMeta(key: string | Plugin | PluginKey) → any
+      */
+      let get:
+        (
+          t,
+          ~key: [
+                  | `String(string)
+                  | `Plugin(Plugin.t('a))
+                  | `PluginKey(PluginKey.t('a))
+                ]
+        ) =>
+        option(v);
+    };
+
+    module Make : (M: {type v;}) => (T with type v := M.v);
+  };
 };

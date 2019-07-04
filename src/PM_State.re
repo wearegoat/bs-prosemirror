@@ -395,31 +395,64 @@ module Transaction = {
   [@bs.send] external deleteSelection: t => t = "deleteSelection";
   [@bs.send]
   external insertText: (t, ~test: string, ~from: int=?, ~to_: int=?, unit) => t = "insertText";
-  [@bs.send]
-  external setMeta:
-    (
-      t,
-      ~key: [@bs.unwrap] [
-              | `String(string)
-              | `Plugin(Plugin.t('a))
-              | `PluginKey(PluginKey.t('a))
-            ],
-      ~value: 'a
-    ) =>
-    t =
-    "setMeta";
-  [@bs.send] [@bs.return nullable]
-  external getMeta:
-    (
-      t,
-      ~key: [@bs.unwrap] [
-              | `String(string)
-              | `Plugin(Plugin.t('a))
-              | `PluginKey(PluginKey.t('a))
-            ]
-    ) =>
-    option('a) =
-    "getMeta";
   [@bs.get] external isGeneric: t => bool = "external ";
   [@bs.send] external scrollIntoView: t => t = "scrollIntoView";
+
+  module Meta = {
+    module type T = {
+      type v;
+      let set:
+        (
+          t,
+          ~key: [
+                  | `String(string)
+                  | `Plugin(Plugin.t('a))
+                  | `PluginKey(PluginKey.t('a))
+                ],
+          ~value: v
+        ) =>
+        t;
+      let get:
+        (
+          t,
+          ~key: [
+                  | `String(string)
+                  | `Plugin(Plugin.t('a))
+                  | `PluginKey(PluginKey.t('a))
+                ]
+        ) =>
+        option(v);
+    };
+
+    module Make = (M: {type v;}) : (T with type v := M.v) => {
+      type v = M.v;
+
+      [@bs.send]
+      external set:
+        (
+          t,
+          ~key: [@bs.unwrap] [
+                  | `String(string)
+                  | `Plugin(Plugin.t('a))
+                  | `PluginKey(PluginKey.t('a))
+                ],
+          ~value: v
+        ) =>
+        t =
+        "setMeta";
+
+      [@bs.send] [@bs.return nullable]
+      external get:
+        (
+          t,
+          ~key: [@bs.unwrap] [
+                  | `String(string)
+                  | `Plugin(Plugin.t('a))
+                  | `PluginKey(PluginKey.t('a))
+                ]
+        ) =>
+        option(v) =
+        "getMeta";
+    };
+  };
 };

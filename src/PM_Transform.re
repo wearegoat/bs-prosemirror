@@ -319,7 +319,7 @@ possible.
       (t, ~pos: int, ~parentType: Model.NodeType.t, ~match: Model.ContentMatch.t=?, unit) => t =
       "clearIncompatible";
     [@bs.send]
-    external replace: (t, ~from: int, ~to_: int=?, ~slice: Model.Slice.t=?, unit) => t = ", ";
+    external replace: (t, ~from: int, ~to_: int=?, ~slice: Model.Slice.t=?, unit) => t = "replace";
 
     [@bs.send]
     external replaceWith:

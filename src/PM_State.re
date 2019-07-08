@@ -106,7 +106,7 @@ module Selection = {
     [@bs.send] external map: (t, ~doc: Model.Node.t, ~mapping: Transform.Mapping.t) => t = "map";
     [@bs.send] external content: t => Model.Slice.t = "content";
     [@bs.send]
-    external replace: (t, ~tr: Types.transaction, ~content: Model.Slice.t=?, unit) => unit = ": ";
+    external replace: (t, ~tr: Types.transaction, ~content: Model.Slice.t=?, unit) => unit = "replace";
     [@bs.send]
     external replaceWith: (t, ~tr: Types.transaction, ~node: Model.Node.t) => unit = "replaceWith";
     [@bs.send] external toJSON: t => Js.Json.t = "toJSON";
@@ -202,7 +202,7 @@ module NodeSelection = {
   [@bs.module "prosemirror-state"] [@bs.new]
   external make: Model.ResolvedPos.t => t = "NodeSelection";
 
-  [@bs.get] external node: t => Model.Node.t = "external ";
+  [@bs.get] external node: t => Model.Node.t = "node";
 
   [@bs.module "prosemirror-state"] [@bs.scope "NodeSelection"]
   external create: (~doc: Model.Node.t, ~from: int) => t = "create";
@@ -243,7 +243,7 @@ module EditorState = {
     let make = t;
   };
 
-  [@bs.get] external doc: t => Model.Node.t = "bs";
+  [@bs.get] external doc: t => Model.Node.t = "doc";
   [@bs.get] external selection: t => Selection.t = "selection";
   [@bs.return nullable] [@bs.get]
   external storedMarks: t => option(array(Model.Mark.t)) = "storedMarks";
@@ -291,7 +291,7 @@ module PluginKey = {
   external make: (~name: string=?, unit) => t('a) = "PluginKey";
 
   [@bs.return nullable] [@bs.send]
-  external get: (t('a), Types.editorState) => option(Types.plugin) = ": ";
+  external get: (t('a), Types.editorState) => option(Types.plugin) = "get";
 
   [@bs.send] external getState: (t('a), Types.editorState) => option('a) = "getState";
 };
@@ -395,7 +395,7 @@ module Transaction = {
   [@bs.send] external deleteSelection: t => t = "deleteSelection";
   [@bs.send]
   external insertText: (t, ~test: string, ~from: int=?, ~to_: int=?, unit) => t = "insertText";
-  [@bs.get] external isGeneric: t => bool = "external ";
+  [@bs.get] external isGeneric: t => bool = "isGeneric";
   [@bs.send] external scrollIntoView: t => t = "scrollIntoView";
 
   module Meta = {

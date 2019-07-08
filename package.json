@@ -1,6 +1,6 @@
 {
   "name": "bs-prosemirror",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Reason/Bucklescript bindings for ProseMirror",
   "scripts": {
     "build": "bsb -make-world",

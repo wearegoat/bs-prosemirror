@@ -545,7 +545,7 @@ module Fragment = {
   [@bs.return nullable] [@bs.get] external lastChild: t => option(Node.t) = "lastChild";
   [@bs.get] external childCount: t => int = "childCount";
   [@bs.send] external childExn: (t, int) => Node.t = "child";
-  [@bs.return nullable] [@bs.send] external maybeChild: (t, int) => option(Node.t) = "nullable";
+  [@bs.return nullable] [@bs.send] external maybeChild: (t, int) => option(Node.t) = "maybeChild";
   [@bs.send]
   external forEach: (t, ~f: (~node: Node.t, ~offset: int, ~index: int) => unit) => unit =
     "forEach";

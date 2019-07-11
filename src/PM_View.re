@@ -9,7 +9,7 @@ module NodeView = PM_NodeView;
 type t = PM_Types.editorView;
 
 module DecorationSet = {
-  type t;
+  type t = Types.decorationSet;
 
   [@bs.module "prosemirror-view"] [@bs.scope "DecorationSet"]
   external create: (~doc: PM_Model.Node.t, ~decorations: array(Decoration.t)) => t = "create";

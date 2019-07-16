@@ -499,9 +499,9 @@ module ResolvedPos = {
   [@bs.send] external index: (t, ~depth: int=?, unit) => int = "index";
   [@bs.send] external indexAfter: (t, ~depth: int=?, unit) => int = "indexAfter";
   [@bs.send] external start: (t, ~depth: int=?, unit) => int = "start";
-  [@bs.send] external end_: t => int = "end";
-  [@bs.send] external before: t => int = "before";
-  [@bs.send] external after: t => int = "after";
+  [@bs.send] external end_: (t, ~depth: int=?, unit) => int = "end";
+  [@bs.send] external before: (t, ~depth: int=?, unit) => int = "before";
+  [@bs.send] external after: (t, ~depth: int=?, unit) => int = "after";
   [@bs.get] external textOffset: t => int = "textOffset";
   [@bs.return nullable] [@bs.get] external nodeAfter: t => option(Types.node) = "nodeAfter";
   [@bs.return nullable] [@bs.get] external nodeBefore: t => option(Types.node) = "nodeBefore";

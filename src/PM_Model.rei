@@ -1355,21 +1355,21 @@ module ResolvedPos: {
    The (absolute) position at the end of the node at the given level.
    end(depth: ?⁠number) → number
    */
-  let end_: t => int;
+  let end_: (t, ~depth: int=?, unit) => int;
 
   /*
    The (absolute) position directly before the wrapping node at the given level,
    or, when level is this.depth + 1, the original position.
    before(depth: ?⁠number) → number
    */
-  let before: t => int;
+  let before: (t, ~depth: int=?, unit) => int;
 
   /*
    The (absolute) position directly after the wrapping node at the given level,
    or the original position when level is this.depth + 1.
    after(depth: ?⁠number) → number
    */
-  let after: t => int;
+  let after: (t, ~depth: int=?, unit) => int;
 
   /*
    When this position points into a text node,

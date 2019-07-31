@@ -167,6 +167,13 @@ module ParseRule: {
    preserveWhitespace: ?⁠bool | "full"
    Controls whether whitespace should be preserved when parsing the content inside the matched element. false means whitespace may be collapsed, true means that whitespace should be preserved but newlines normalized to spaces, and "full" means that newlines should also be preserved.
       */
+
+  module GetAttrsResult: {
+    type t =
+      | NoMatch
+      | Empty
+      | Attrs(Attrs.t);
+  };
   type t;
   let t:
     (
@@ -180,8 +187,8 @@ module ParseRule: {
       ~ignore: bool=?,
       ~skip: bool=?,
       ~attrs: Js.Dict.t(AttributeSpec.t)=?,
-      ~getAttrsWithNode: Dom.node => Attrs.t=?,
-      ~getAttrsWithString: string => Attrs.t=?,
+      ~getAttrsWithNode: Dom.node => GetAttrsResult.t=?,
+      ~getAttrsWithString: string => GetAttrsResult.t=?,
       ~contentElementWithNode: Dom.node => Dom.node=?,
       ~contentElementWithString: string => Dom.node=?,
       ~getContent: (Dom.node, PM_Types.schema) => PM_Types.fragment=?,

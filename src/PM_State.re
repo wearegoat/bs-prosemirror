@@ -350,6 +350,8 @@ module PluginSpec = {
         ~newState: Types.editorState
       ) =>
       Js.Nullable.t(Types.transaction),
+    [@bs.optional]
+    historyPreserveItems: bool
   };
 
   let make = t;

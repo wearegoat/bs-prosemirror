@@ -504,7 +504,7 @@ module Transform: {
         ~wrappers: array({
                      .
                      "attrs": PM_Model.Attrs.t,
-                     "type_": PM_Model.NodeType.t,
+                     "_type": PM_Model.NodeType.t,
                    })
       ) =>
       t;
@@ -555,7 +555,7 @@ module Transform: {
         ~typesAfter: array({
                        .
                        "attrs": PM_Model.Attrs.t,
-                       "type_": PM_Model.NodeType.t,
+                       "_type": PM_Model.NodeType.t,
                      })
                        =?,
         unit
@@ -608,7 +608,7 @@ module Transform: {
         array({
           .
           "attrs": PM_Model.Attrs.t,
-          "type_": PM_Model.NodeType.t,
+          "_type": PM_Model.NodeType.t,
         }),
       );
 
@@ -624,7 +624,7 @@ module Transform: {
         ~typesAfter: array({
                        .
                        "attrs": PM_Model.Attrs.t,
-                       "type_": PM_Model.NodeType.t,
+                       "_type": PM_Model.NodeType.t,
                      })
                        =?
       ) =>

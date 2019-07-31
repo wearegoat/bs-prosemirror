@@ -422,7 +422,7 @@ module ContentMatch: {
     t =>
     {
       .
-      "type_": PM_Types.nodeType,
+      "_type": PM_Types.nodeType,
       "next": t,
     };
 };

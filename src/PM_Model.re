@@ -70,44 +70,107 @@ module DOMSerializer = {
 };
 
 module ParseRule = {
-  [@bs.deriving abstract]
-  type t = {
-    [@bs.optional]
-    tag: string,
-    [@bs.optional]
-    namespace: string,
-    [@bs.optional]
-    style: string,
-    [@bs.optional]
-    priority: int,
-    [@bs.optional]
-    context: string,
-    [@bs.optional]
-    node: string,
-    [@bs.optional]
-    mark: string,
-    [@bs.optional]
-    ignore: bool,
-    [@bs.optional]
-    skip: bool,
-    [@bs.optional]
-    attrs: Js.Dict.t(AttributeSpec.t),
-    // This Js.t({.}) could be an object or false
-    [@bs.optional] [@bs.as "getAttrs"]
-    getAttrsWithNode: Dom.node => Attrs.t,
-    [@bs.optional] [@bs.as "getAttrs"]
-    getAttrsWithString: string => Attrs.t,
-    [@bs.optional] [@bs.as "contentElement"]
-    contentElementWithNode: Dom.node => Dom.node,
-    [@bs.optional] [@bs.as "contentElement"]
-    contentElementWithString: string => Dom.node,
-    [@bs.optional]
-    getContent: (Dom.node, Types.schema) => Types.fragment,
-    // Only possible value is "full"
-    [@bs.optional] [@bs.as "preserveWhitespace"]
-    preserveWhitespaceFull: string,
-    [@bs.optional]
-    preserveWhitespace: bool,
+  module GetAttrsResult = {
+    type t =
+      | NoMatch
+      | Empty
+      | Attrs(Attrs.t);
+    type js;
+    let toJs: t => js =
+      a => {
+        switch (a) {
+        | NoMatch => Obj.magic(false)
+        | Empty => Obj.magic(Js.Nullable.null)
+        | Attrs(attrs) => Obj.magic(attrs)
+        };
+      };
+  };
+
+  module Ext = {
+    [@bs.deriving abstract]
+    type t = {
+      [@bs.optional]
+      tag: string,
+      [@bs.optional]
+      namespace: string,
+      [@bs.optional]
+      style: string,
+      [@bs.optional]
+      priority: int,
+      [@bs.optional]
+      context: string,
+      [@bs.optional]
+      node: string,
+      [@bs.optional]
+      mark: string,
+      [@bs.optional]
+      ignore: bool,
+      [@bs.optional]
+      skip: bool,
+      [@bs.optional]
+      attrs: Js.Dict.t(AttributeSpec.t),
+      [@bs.optional] [@bs.as "getAttrs"]
+      getAttrsWithNode: Dom.node => GetAttrsResult.js,
+      [@bs.optional] [@bs.as "getAttrs"]
+      getAttrsWithString: string => GetAttrsResult.js,
+      [@bs.optional] [@bs.as "contentElement"]
+      contentElementWithNode: Dom.node => Dom.node,
+      [@bs.optional] [@bs.as "contentElement"]
+      contentElementWithString: string => Dom.node,
+      [@bs.optional]
+      getContent: (Dom.node, Types.schema) => Types.fragment,
+      // Only possible value is "full"
+      [@bs.optional] [@bs.as "preserveWhitespace"]
+      preserveWhitespaceFull: string,
+      [@bs.optional]
+      preserveWhitespace: bool,
+    };
+  };
+
+  type t = Ext.t;
+
+  let t =
+      (
+        ~tag: option(string)=?,
+        ~namespace: option(string)=?,
+        ~style: option(string)=?,
+        ~priority: option(int)=?,
+        ~context: option(string)=?,
+        ~node: option(string)=?,
+        ~mark: option(string)=?,
+        ~ignore: option(bool)=?,
+        ~skip: option(bool)=?,
+        ~attrs: option(Js.Dict.t(AttributeSpec.t))=?,
+        ~getAttrsWithNode: option(Dom.node => GetAttrsResult.t)=?,
+        ~getAttrsWithString: option(string => GetAttrsResult.t)=?,
+        ~contentElementWithNode: option(Dom.node => Dom.node)=?,
+        ~contentElementWithString: option(string => Dom.node)=?,
+        ~getContent: option((Dom.node, Types.schema) => Types.fragment)=?,
+        ~preserveWhitespaceFull: option(string)=?,
+        ~preserveWhitespace: option(bool)=?,
+        (),
+      ) => {
+    let fnResultToJs = fnO => fnO->Belt.Option.map((fn, x) => GetAttrsResult.toJs(fn(x)));
+    Ext.t(
+      ~tag?,
+      ~namespace?,
+      ~style?,
+      ~priority?,
+      ~context?,
+      ~node?,
+      ~mark?,
+      ~ignore?,
+      ~skip?,
+      ~attrs?,
+      ~getAttrsWithNode=?getAttrsWithNode |> fnResultToJs,
+      ~getAttrsWithString=?getAttrsWithString |> fnResultToJs,
+      ~contentElementWithNode?,
+      ~contentElementWithString?,
+      ~getContent?,
+      ~preserveWhitespaceFull?,
+      ~preserveWhitespace?,
+      (),
+    );
   };
 };
 

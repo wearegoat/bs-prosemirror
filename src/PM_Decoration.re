@@ -9,7 +9,7 @@ type spec = Js.Dict.t(string);
 [@bs.deriving abstract]
 type t = {
   from: int,
-  to_: int,
+  [@bs.as "to"] to_: int,
   spec,
 };
 

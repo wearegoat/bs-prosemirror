@@ -520,6 +520,10 @@ module PluginSpec: {
     transactions. When another plugin appends a transaction after this was called, it is called
     again with the new state and new transactions—but only the new transactions, i.e. it won't be
     passed transactions that it already saw.
+
+    [historyPreserveItems] This is used to notify the history plugin to not merge steps,
+    so that the history can be rebased.
+    Used in the collab plugin for example
    */
   let make:
     (
@@ -535,6 +539,7 @@ module PluginSpec: {
                           ) =>
                           Js.Nullable.t(PM_Types.transaction)
                             =?,
+      ~historyPreserveItems: bool=?,
       unit
     ) =>
     t('a);

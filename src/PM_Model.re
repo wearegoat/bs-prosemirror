@@ -242,7 +242,7 @@ module ContentMatch = {
     t =>
     {
       .
-      "type_": Types.nodeType,
+      "_type": Types.nodeType,
       "next": t,
     } =
     "edge";

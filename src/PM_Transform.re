@@ -212,7 +212,7 @@ module Transform = {
         ~range: Model.NodeRange.t,
         ~wrappers: array({
                      .
-                     "type_": Model.NodeType.t,
+                     "_type": Model.NodeType.t,
                      "attrs": Model.Attrs.t,
                    })
       ) =>
@@ -236,7 +236,7 @@ module Transform = {
         ~depth: int=?,
         ~typesAfter: array({
                        .
-                       "type_": Model.NodeType.t,
+                       "_type": Model.NodeType.t,
                        "attrs": Model.Attrs.t,
                      })
                        =?,
@@ -265,7 +265,7 @@ possible.
       option(
         array({
           .
-          "type_": Model.NodeType.t,
+          "_type": Model.NodeType.t,
           "attrs": Model.Attrs.t,
         }),
       );
@@ -276,7 +276,7 @@ possible.
         ~depth: int=?,
         ~typesAfter: array({
                        .
-                       "type_": Model.NodeType.t,
+                       "_type": Model.NodeType.t,
                        "attrs": Model.Attrs.t,
                      })
                        =?
@@ -363,7 +363,7 @@ possible.
         ~range: Model.NodeRange.t,
         ~wrappers: array({
                      .
-                     "type_": Model.NodeType.t,
+                     "_type": Model.NodeType.t,
                      "attrs": Model.Attrs.t,
                    })
       ) =>
@@ -393,7 +393,7 @@ possible.
         ~depth: int=?,
         ~typesAfter: array({
                        .
-                       "type_": Model.NodeType.t,
+                       "_type": Model.NodeType.t,
                        "attrs": Model.Attrs.t,
                      })
                        =?,
@@ -425,7 +425,7 @@ possible.
       option(
         array({
           .
-          "type_": Model.NodeType.t,
+          "_type": Model.NodeType.t,
           "attrs": Model.Attrs.t,
         }),
       ) =
@@ -438,7 +438,7 @@ possible.
         ~depth: int=?,
         ~typesAfter: array({
                        .
-                       "type_": Model.NodeType.t,
+                       "_type": Model.NodeType.t,
                        "attrs": Model.Attrs.t,
                      })
                        =?

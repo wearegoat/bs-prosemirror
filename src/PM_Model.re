@@ -108,7 +108,7 @@ module ParseRule = {
       [@bs.optional]
       skip: bool,
       [@bs.optional]
-      attrs: Js.Dict.t(AttributeSpec.t),
+      attrs: Attrs.t,
       [@bs.optional] [@bs.as "getAttrs"]
       getAttrsWithNode: Dom.node => GetAttrsResult.js,
       [@bs.optional] [@bs.as "getAttrs"]
@@ -140,7 +140,7 @@ module ParseRule = {
         ~mark: option(string)=?,
         ~ignore: option(bool)=?,
         ~skip: option(bool)=?,
-        ~attrs: option(Js.Dict.t(AttributeSpec.t))=?,
+        ~attrs: option(Attrs.t)=?,
         ~getAttrsWithNode: option(Dom.node => GetAttrsResult.t)=?,
         ~getAttrsWithString: option(string => GetAttrsResult.t)=?,
         ~contentElementWithNode: option(Dom.node => Dom.node)=?,

@@ -186,7 +186,7 @@ module ParseRule: {
       ~mark: string=?,
       ~ignore: bool=?,
       ~skip: bool=?,
-      ~attrs: Js.Dict.t(AttributeSpec.t)=?,
+      ~attrs: Attrs.t=?,
       ~getAttrsWithNode: Dom.node => GetAttrsResult.t=?,
       ~getAttrsWithString: string => GetAttrsResult.t=?,
       ~contentElementWithNode: Dom.node => Dom.node=?,

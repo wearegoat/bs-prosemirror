@@ -140,7 +140,7 @@ let wrapIn:
     ~nodeType: PM_Model.NodeType.t,
     ~attrs: PM_Model.Attrs.t,
     ~state: PM_State.EditorState.t,
-    ~dispatch: PM_State.Transaction.t => bool=?,
+    ~dispatch: PM_State.Transaction.t => unit=?,
     ~view: PM_View.t=?,
     unit
   ) =>
@@ -156,7 +156,7 @@ let setBlockType:
     ~nodeType: PM_Model.NodeType.t,
     ~attrs: PM_Model.Attrs.t,
     ~state: PM_State.EditorState.t,
-    ~dispatch: PM_State.Transaction.t => bool=?,
+    ~dispatch: PM_State.Transaction.t => unit=?,
     ~view: PM_View.t=?,
     unit
   ) =>
@@ -174,7 +174,7 @@ let toggleMark:
     ~markType: PM_Model.MarkType.t,
     ~attrs: PM_Model.Attrs.t,
     ~state: PM_State.EditorState.t,
-    ~dispatch: PM_State.Transaction.t => bool=?,
+    ~dispatch: PM_State.Transaction.t => unit=?,
     ~view: PM_View.t=?,
     unit
   ) =>

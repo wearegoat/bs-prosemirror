@@ -157,7 +157,7 @@ module Transform = {
     let docs: t => array(Model.Node.t);
     let mapping: t => Mapping.t;
     let before: t => Model.Node.t;
-    let step: (t, ~step: Step.t) => Step.t;
+    let step: (t, ~step: Step.t) => t;
     let maybeStep: (t, ~step: Step.t) => StepResult.t;
     let docChanged: t => bool;
     let addMark: (t, ~from: int, ~to_: int, ~mark: Model.Mark.t) => t;
@@ -299,7 +299,7 @@ possible.
     [@bs.get] external docs: t => array(Model.Node.t) = "docs";
     [@bs.get] external mapping: t => Mapping.t = "mapping";
     [@bs.get] external before: t => Model.Node.t = "before";
-    [@bs.send] external step: (t, ~step: Step.t) => Step.t = "step";
+    [@bs.send] external step: (t, ~step: Step.t) => t = "step";
     [@bs.send] external maybeStep: (t, ~step: Step.t) => StepResult.t = "maybeStep";
     [@bs.get] external docChanged: t => bool = "docChanged";
     [@bs.send] external addMark: (t, ~from: int, ~to_: int, ~mark: Model.Mark.t) => t = "addMark";

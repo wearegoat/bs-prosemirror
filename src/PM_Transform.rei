@@ -364,7 +364,7 @@ module Transform: {
   Apply a new step in this transform, saving the result. Throws an error when the step fails.
   step(step: Step) → this
   */
-    let step: (t, ~step: Step.t) => Step.t;
+    let step: (t, ~step: Step.t) => t;
 
     /**
   Try to apply a step in this transformation, ignoring it if it fails. Returns the step result.

@@ -626,7 +626,8 @@ module Transform: {
                        "attrs": PM_Model.Attrs.t,
                        "_type": PM_Model.NodeType.t,
                      })
-                       =?
+                       =?,
+        unit
       ) =>
       bool;
     /**

@@ -279,7 +279,8 @@ possible.
                        "_type": Model.NodeType.t,
                        "attrs": Model.Attrs.t,
                      })
-                       =?
+                       =?,
+        unit
       ) =>
       bool;
     let canJoin: (~doc: Model.Node.t, ~pos: int) => bool;
@@ -441,7 +442,8 @@ possible.
                        "_type": Model.NodeType.t,
                        "attrs": Model.Attrs.t,
                      })
-                       =?
+                       =?,
+        unit
       ) =>
       bool =
       "canSplit";

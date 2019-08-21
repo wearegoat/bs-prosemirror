@@ -371,6 +371,7 @@ module NodeType = {
   [@bs.send] external allowsMarks: (t, ~marks: array(Types.mark)) => bool = "allowsMarks";
   [@bs.send]
   external allowedMarks: (t, ~marks: array(Types.mark)) => array(Types.mark) = "allowedMarks";
+  [@bs.send] external compatibleContent: (t, t) => bool = "compatibleContent";
 };
 
 module MarkSpec = {

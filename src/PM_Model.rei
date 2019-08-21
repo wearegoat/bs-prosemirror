@@ -723,6 +723,12 @@ module NodeType: {
    allowedMarks(marks: [Mark]) → [Mark]
    */
   let allowedMarks: (t, ~marks: array(PM_Types.mark)) => array(PM_Types.mark);
+
+  /*
+   This is not referenced in the Prosemirror documentation however it is used by offical plugins.
+   Such as: prosemirror-shema-list, prosemirror-model, prosemirror-commands
+   */
+  let compatibleContent: (t, t) => bool;
 };
 
 module MarkSpec: {

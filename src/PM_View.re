@@ -259,4 +259,4 @@ external endOfTextblock:
 /* Removes the editor from the DOM and destroys all node views. */
 [@bs.send] external destroy: t => unit = "destroy";
 
-[@bs.send] external dispatch: (t, PM_State.Transaction.t) => bool = "dispatch";
+[@bs.send] external dispatch: (t, PM_State.Transaction.t) => unit = "dispatch";

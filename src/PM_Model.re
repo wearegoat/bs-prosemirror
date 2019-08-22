@@ -633,8 +633,8 @@ module Fragment = {
   [@bs.module "prosemirror-model"] [@bs.scope "Fragment"]
   external fromArray: array(Node.t) => t = "fromArray";
 
-  [@bs.module "prosemirror-model"] [@bs.scope "Fragment"]
-  external fromNode: Node.t => t = "fromNode";
+  [@bs.module "prosemirror-model"] [@bs.scope "Fragment"] external fromNode: Node.t => t = "from";
+
   [@bs.module "prosemirror-model"] [@bs.scope "Fragment"] external empty: t = "empty";
 };
 

@@ -1497,7 +1497,7 @@ module Fragment: {
    The callback may return false to prevent traversal of a given node's children.
    descendants(f: fn(node: Node, pos: number, parent: Node) → ?⁠bool)
    */
-  let descendants: (t, ~f: (~node: Node.t, ~pos: int, ~parent: t) => bool) => unit;
+  let descendants: (t, ~f: (~node: Node.t, ~pos: int, ~parent: Node.t) => bool) => unit;
 
   /*
    Create a new fragment containing the combined content of this fragment and the other.

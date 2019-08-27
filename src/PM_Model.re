@@ -599,7 +599,7 @@ module Fragment = {
     unit =
     "nodesBetween";
   [@bs.send]
-  external descendants: (t, ~f: (~node: Node.t, ~pos: int, ~parent: t) => bool) => unit =
+  external descendants: (t, ~f: (~node: Node.t, ~pos: int, ~parent: Node.t) => bool) => unit =
     "descendants";
   [@bs.send] external append: (t, ~other: t) => t = "append";
   [@bs.send] external cut: (t, ~from: int, ~to_: int=?, unit) => t = "cut";

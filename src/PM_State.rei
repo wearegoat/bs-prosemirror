@@ -666,7 +666,7 @@ module Transaction: {
     Replace the given range, or the selection if no range is given, with a text node containing the given string.
     insertText(text: string, from: ?⁠number, to: ?⁠number = from) → Transaction
    */
-  let insertText: (t, ~test: string, ~from: int=?, ~to_: int=?, unit) => t;
+  let insertText: (t, ~text: string, ~from: int=?, ~to_: int=?, unit) => t;
 
   /**
     Returns true if this transaction doesn't contain any metadata, and can thus safely be extended.

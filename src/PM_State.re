@@ -396,7 +396,7 @@ module Transaction = {
     "replaceSelectionWith";
   [@bs.send] external deleteSelection: t => t = "deleteSelection";
   [@bs.send]
-  external insertText: (t, ~test: string, ~from: int=?, ~to_: int=?, unit) => t = "insertText";
+  external insertText: (t, ~text: string, ~from: int=?, ~to_: int=?, unit) => t = "insertText";
   [@bs.get] external isGeneric: t => bool = "isGeneric";
   [@bs.send] external scrollIntoView: t => t = "scrollIntoView";
 

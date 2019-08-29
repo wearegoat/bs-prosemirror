@@ -1,7 +1,14 @@
 module Command = PM_Command;
 
 [@bs.module "prosemirror-commands"] [@bs.variadic]
-external chainCommands: array(Command.t) => Command.t = "chainCommands";
+external chainCommandsExt: array(Command.t) => Command.ext = "chainCommands";
+
+let chainCommands: array(Command.t) => Command.t =
+  (cmds, ~state, ~dispatch=?, ~view=?, ()) => {
+    let fromOption = Js.Undefined.fromOption;
+    let fn = chainCommandsExt(cmds);
+    fn(. state, dispatch->fromOption, view->fromOption);
+  };
 
 [@bs.module "prosemirror-commands"] external deleteSelection: Command.t = "deleteSelection";
 

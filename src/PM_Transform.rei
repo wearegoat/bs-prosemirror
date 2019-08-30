@@ -7,7 +7,7 @@ module StepResult: {
   The transformed document.
   doc: ?⁠Node
    */
-  let doc: t => PM_Types.node;
+  let doc: t => option(PM_Types.node);
   /**
    Text providing information about a failed step.
    failed: ?⁠string

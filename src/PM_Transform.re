@@ -58,7 +58,7 @@ module StepMap = {
 
 module StepResult = {
   type t;
-  [@bs.get] external doc: t => Types.node = "doc";
+  [@bs.get] external doc: t => option(Types.node) = "doc";
   [@bs.return nullable] [@bs.get] external failed: t => option(string) = "failed";
   [@bs.module "prosemirror-transform"] [@bs.scope "StepResult"]
   external ok: (~doc: Types.node) => t = "ok";

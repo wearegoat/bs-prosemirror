@@ -15,6 +15,7 @@ module DOMOutputSpec = {
   type spec =
     | LeafNode(string, Attrs.t): spec
     | Node(string, Attrs.t, spec): spec
+    | Text(string): spec
     | Hole: spec;
   type t;
   let fromString: string => t = a => Obj.magic(a);
@@ -26,6 +27,7 @@ module DOMOutputSpec = {
           switch (a) {
           | LeafNode(str, obj) => (str, obj) |> Obj.magic
           | Hole => Obj.magic(0)
+          | Text(text) => Obj.magic(text)
           | Node(str, obj, y) => (str, obj, run(y)) |> Obj.magic
           };
       run(a);

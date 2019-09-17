@@ -32,6 +32,7 @@ module DOMOutputSpec: {
   type spec =
     | LeafNode(string, Attrs.t): spec
     | Node(string, Attrs.t, spec): spec
+    | Text(string): spec
     | Hole: spec;
 
   type t;

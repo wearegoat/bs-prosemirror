@@ -48,74 +48,72 @@ module DirectEditorProps = {
     "bottom": int,
     "left": int,
   };
+  type domEventHandler = (~view: Types.editorView, ~event: Dom.event) => bool;
+  type keyboardEventHandler = (~view: Types.editorView, ~event: Dom.keyboardEvent) => bool;
+  type mouseEventOnHandler =
+    (
+      ~view: Types.editorView,
+      ~pos: int,
+      ~node: PM_Model.Node.t,
+      ~nodePos: int,
+      ~event: Dom.mouseEvent,
+      ~direct: bool
+    ) =>
+    bool;
+  type mouseEventHandler = (~view: Types.editorView, ~pos: int, ~event: Dom.mouseEvent) => bool;
+  type dropHandler =
+    (~view: Types.editorView, ~event: Dom.event, ~slice: PM_Model.Slice.t, ~moved: bool) => bool;
+  type createSelectionBetween =
+    (~view: Types.editorView, ~anchor: PM_Model.ResolvedPos.t, ~head: PM_Model.ResolvedPos.t) =>
+    option(PM_State.Selection.t);
+  type nodeViewInit =
+    (
+      ~node: PM_Model.Node.t,
+      ~view: Types.editorView,
+      ~getPos: unit => int,
+      ~decorations: array(Decoration.t)
+    ) =>
+    NodeView.t;
+  type pasteHandler =
+    (~view: Types.editorView, ~event: Dom.event, ~slice: PM_Model.Slice.t) => bool;
   [@bs.deriving abstract]
   type t = {
     [@bs.optional]
-    handleDOMEvents: Js.Dict.t((~view: Types.editorView, ~event: Dom.event) => bool),
+    handleDOMEvents: Js.Dict.t(domEventHandler),
     [@bs.optional]
-    handleKeyDown: (~view: Types.editorView, ~event: Dom.keyboardEvent) => bool,
+    handleKeyDown: keyboardEventHandler,
     [@bs.optional]
-    handleKeyPress: (~view: Types.editorView, ~event: Dom.keyboardEvent) => bool,
+    handleKeyPress: keyboardEventHandler,
     [@bs.optional]
     handleTextInput: (~view: Types.editorView, ~from: int, ~to_: int, ~text: string) => bool,
     [@bs.optional]
-    handleClickOn:
-      (
-        ~view: Types.editorView,
-        ~pos: int,
-        ~node: PM_Model.Node.t,
-        ~nodePos: int,
-        ~event: Dom.mouseEvent,
-        ~direct: bool
-      ) =>
-      bool,
+    handleClickOn: mouseEventOnHandler,
     [@bs.optional]
-    handleClick: (~view: Types.editorView, ~pos: int, ~event: Dom.mouseEvent) => bool,
+    handleClick: mouseEventHandler,
     [@bs.optional]
-    handleDoubleClickOn:
-      (
-        ~view: Types.editorView,
-        ~pos: int,
-        ~node: PM_Model.Node.t,
-        ~nodePos: int,
-        ~event: Dom.mouseEvent,
-        ~direct: bool
-      ) =>
-      bool,
+    handleDoubleClickOn: mouseEventOnHandler,
     [@bs.optional]
-    handleDoubleClick: (~view: Types.editorView, ~pos: int, ~event: Dom.mouseEvent) => bool,
+    handleDoubleClick: mouseEventHandler,
     [@bs.optional]
-    handleTripleClickOn:
-      (
-        ~view: Types.editorView,
-        ~pos: int,
-        ~node: PM_Model.Node.t,
-        ~nodePos: int,
-        ~event: Dom.mouseEvent,
-        ~direct: bool
-      ) =>
-      bool,
+    handleTripleClickOn: mouseEventOnHandler,
     [@bs.optional]
-    handleTripleClick: (~view: Types.editorView, ~pos: int, ~event: Dom.mouseEvent) => bool,
+    handleTripleClick: mouseEventHandler,
     [@bs.optional]
-    handlePaste: (~view: Types.editorView, ~event: Dom.event, ~slice: PM_Model.Slice.t) => bool,
+    handlePaste: pasteHandler,
     [@bs.optional]
-    handleDrop:
-      (~view: Types.editorView, ~event: Dom.event, ~slice: PM_Model.Slice.t, ~moved: bool) => bool,
+    handleDrop: dropHandler,
     [@bs.optional]
     handleScrollToSelection: Types.editorView => bool,
     [@bs.optional]
-    createSelectionBetween:
-      (~view: Types.editorView, ~anchor: PM_Model.ResolvedPos.t, ~head: PM_Model.ResolvedPos.t) =>
-      option(PM_State.Selection.t),
+    createSelectionBetween,
     /* TODO: */
-    /* [@bs.optional] */
-    /* domParser: PM_Model.DOMParser.t, */
+    [@bs.optional]
+    domParser: PM_Model.DOMParser.t,
     [@bs.optional]
     transformPastedHTML: (~html: string) => string,
     /* TODO: */
-    /* [@bs.optional] */
-    /* clipboardParser: PM_Model.DOMParser.t, */
+    [@bs.optional]
+    clipboardParser: PM_Model.DOMParser.t,
     [@bs.optional]
     transformPastedText: (~text: string) => string,
     [@bs.optional]
@@ -123,16 +121,7 @@ module DirectEditorProps = {
     [@bs.optional]
     transformPasted: PM_Model.Slice.t => PM_Model.Slice.t,
     [@bs.optional]
-    nodeViews:
-      Js.Dict.t(
-        (
-          ~node: PM_Model.Node.t,
-          ~view: Types.editorView,
-          ~getPos: unit => int,
-          ~decorations: array(Decoration.t)
-        ) =>
-        NodeView.t,
-      ),
+    nodeViews: Js.Dict.t(nodeViewInit),
     [@bs.optional]
     clipboardSerializer: PM_Model.DOMSerializer.t,
     [@bs.optional]
@@ -155,7 +144,88 @@ module DirectEditorProps = {
     scrollMarginObj: pos,
     state: PM_State.EditorState.t,
     [@bs.optional]
-    dispatchTransaction: PM_State.Transaction.t => unit,
+    dispatchTransaction: [@bs.this] ((Types.editorView, PM_State.Transaction.t) => unit),
+  };
+  let make =
+      (
+        ~state: PM_State.EditorState.t,
+        ~handleDOMEvents: option(Js.Dict.t(domEventHandler))=?,
+        ~handleKeyDown: option(keyboardEventHandler)=?,
+        ~handleKeyPress: option(keyboardEventHandler)=?,
+        ~handleTextInput:
+           option((~view: Types.editorView, ~from: int, ~to_: int, ~text: string) => bool)=?,
+        ~handleClickOn: option(mouseEventOnHandler)=?,
+        ~handleClick: option(mouseEventHandler)=?,
+        ~handleDoubleClickOn: option(mouseEventOnHandler)=?,
+        ~handleDoubleClick: option(mouseEventHandler)=?,
+        ~handleTripleClickOn: option(mouseEventOnHandler)=?,
+        ~handleTripleClick: option(mouseEventHandler)=?,
+        ~handlePaste: option(pasteHandler)=?,
+        ~handleDrop: option(dropHandler)=?,
+        ~handleScrollToSelection: option(Types.editorView => bool)=?,
+        ~createSelectionBetween: option(createSelectionBetween)=?,
+        ~domParser: option(PM_Model.DOMParser.t)=?,
+        ~transformPastedHTML: option((~html: string) => string)=?,
+        ~clipboardParser: option(PM_Model.DOMParser.t)=?,
+        ~transformPastedText: option((~text: string) => string)=?,
+        ~clipboardTextParser:
+           option((~text: string, ~context: PM_Model.ResolvedPos.t) => PM_Model.Slice.t)=?,
+        ~transformPasted: option(PM_Model.Slice.t => PM_Model.Slice.t)=?,
+        ~nodeViews: option(Js.Dict.t(nodeViewInit))=?,
+        ~clipboardSerializer: option(PM_Model.DOMSerializer.t)=?,
+        ~clipboardTextSerializer: option(PM_Model.Slice.t => string)=?,
+        ~decorations: option(PM_State.EditorState.t => DecorationSet.t)=?,
+        ~editable: option(PM_State.EditorState.t => bool)=?,
+        ~attributes: option(PM_Model.Attrs.t)=?,
+        ~attributesFn: option(PM_State.EditorState.t => Js.Nullable.t(PM_Model.Attrs.t))=?,
+        ~scrollThreshold: option(int)=?,
+        ~scrollThresholdObj: option(pos)=?,
+        ~scrollMargin: option(int)=?,
+        ~scrollMarginObj: option(pos)=?,
+        ~dispatchTransaction: option((Types.editorView, PM_State.Transaction.t) => unit)=?,
+        (),
+      ) => {
+    let dispatchTransaction =
+      switch (dispatchTransaction) {
+      | Some(fn) => Some([@bs.this] (a, b) => fn(a, b))
+      | None => None
+      };
+    t(
+      ~handleDOMEvents?,
+      ~handleKeyDown?,
+      ~handleKeyPress?,
+      ~handleTextInput?,
+      ~handleClickOn?,
+      ~handleClick?,
+      ~handleDoubleClickOn?,
+      ~handleDoubleClick?,
+      ~handleTripleClickOn?,
+      ~handleTripleClick?,
+      ~handlePaste?,
+      ~handleDrop?,
+      ~handleScrollToSelection?,
+      ~createSelectionBetween?,
+      ~domParser?,
+      ~transformPastedHTML?,
+      ~clipboardParser?,
+      ~transformPastedText?,
+      ~clipboardTextParser?,
+      ~transformPasted?,
+      ~nodeViews?,
+      ~clipboardSerializer?,
+      ~clipboardTextSerializer?,
+      ~decorations?,
+      ~editable?,
+      ~attributes?,
+      ~attributesFn?,
+      ~scrollThreshold?,
+      ~scrollThresholdObj?,
+      ~scrollMargin?,
+      ~scrollMarginObj?,
+      ~state,
+      ~dispatchTransaction?,
+      (),
+    );
   };
 };
 

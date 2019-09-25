@@ -41,7 +41,18 @@ let config =
 
 let state = EditorState.create(config);
 
-let viewConfig = PM.View.DirectEditorProps.t(~state, ());
+let viewConfig =
+  PM.View.DirectEditorProps.make(
+    ~state,
+    ~dispatchTransaction=
+      (view, tr) => {
+        Js.log2("tr", tr);
+        let oldState = view->PM.View.state;
+        let newState = oldState->PM.State.EditorState.apply(tr);
+        PM.View.updateState(view, newState);
+      },
+    (),
+  );
 
 let editorNode = {
   Webapi.(Dom.Document.getElementById("editor", Dom.document)->Belt.Option.getExn);

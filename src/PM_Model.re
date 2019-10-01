@@ -269,37 +269,110 @@ module NodeRange = {
 };
 
 module NodeSpec = {
-  [@bs.deriving abstract]
-  type t = {
-    [@bs.optional]
-    content: string,
-    [@bs.optional]
-    marks: string,
-    [@bs.optional]
-    group: string,
-    [@bs.optional]
-    inline: bool,
-    [@bs.optional]
-    atom: bool,
-    [@bs.optional]
-    attrs: Js.Dict.t(AttributeSpec.t),
-    [@bs.optional]
-    selectable: bool,
-    [@bs.optional]
-    draggable: bool,
-    [@bs.optional]
-    code: bool,
-    [@bs.optional]
-    defining: bool,
-    [@bs.optional]
-    isolating: bool,
-    [@bs.optional]
-    toDOM: Types.node => DOMOutputSpec.t,
-    [@bs.optional]
-    parseDOM: array(ParseRule.t),
-    [@bs.optional]
-    toDebugString: Types.node => string,
+  module Custom = {
+    type t;
+    let fromJs: Js.t({..}) => t = Obj.magic;
+    let toJs: t => Js.t({..}) = Obj.magic;
   };
+
+  let toOption = Js.Null_undefined.toOption;
+
+  let fromOption =
+    fun
+    | Some(a) => Js.Null_undefined.return(a)
+    | None => Js.Null_undefined.undefined;
+
+  type t = {
+    .
+    "content": Js.Null_undefined.t(string),
+    "marks": Js.Null_undefined.t(string),
+    "group": Js.Null_undefined.t(string),
+    "inline": Js.Null_undefined.t(bool),
+    "atom": Js.Null_undefined.t(bool),
+    "attrs": Js.Null_undefined.t(Js.Dict.t(AttributeSpec.t)),
+    "selectable": Js.Null_undefined.t(bool),
+    "draggable": Js.Null_undefined.t(bool),
+    "code": Js.Null_undefined.t(bool),
+    "defining": Js.Null_undefined.t(bool),
+    "isolating": Js.Null_undefined.t(bool),
+    "toDOM": Js.Null_undefined.t(Types.node => DOMOutputSpec.t),
+    "parseDOM": Js.Null_undefined.t(array(ParseRule.t)),
+    "toDebugString": Js.Null_undefined.t(Types.node => string),
+    "custom": Js.Null_undefined.t(Custom.t),
+  };
+
+  let make =
+      (
+        ~content: option(string)=?,
+        ~marks: option(string)=?,
+        ~group: option(string)=?,
+        ~inline: option(bool)=?,
+        ~atom: option(bool)=?,
+        ~attrs: option(Js.Dict.t(AttributeSpec.t))=?,
+        ~selectable: option(bool)=?,
+        ~draggable: option(bool)=?,
+        ~code: option(bool)=?,
+        ~defining: option(bool)=?,
+        ~isolating: option(bool)=?,
+        ~toDOM: option(Types.node => DOMOutputSpec.t)=?,
+        ~parseDOM: option(array(ParseRule.t))=?,
+        ~toDebugString: option(Types.node => string)=?,
+        ~custom: option(Custom.t)=?,
+        (),
+      )
+      : t => {
+    let base = {
+      "content": content->fromOption,
+      "marks": marks->fromOption,
+      "group": group->fromOption,
+      "inline": inline->fromOption,
+      "atom": atom->fromOption,
+      "attrs": attrs->fromOption,
+      "selectable": selectable->fromOption,
+      "draggable": draggable->fromOption,
+      "code": code->fromOption,
+      "defining": defining->fromOption,
+      "isolating": isolating->fromOption,
+      "toDOM": toDOM->fromOption,
+      "parseDOM": parseDOM->fromOption,
+      "toDebugString": toDebugString->fromOption,
+      "custom": custom->fromOption,
+    };
+    switch (custom) {
+    | Some(c) => Js.Obj.assign(base, c->Custom.toJs)
+    | None => base
+    };
+  };
+
+  let t = make(~custom=?None);
+
+  let content = (a: t) => a##content->toOption;
+
+  let marks = a => a##marks->toOption;
+
+  let inline = a => a##inline->toOption;
+
+  let atom = a => a##atom->toOption;
+
+  let attrs = a => a##attrs->toOption;
+
+  let selectable = a => a##selectable->toOption;
+
+  let draggable = a => a##draggable->toOption;
+
+  let code = a => a##code->toOption;
+
+  let defining = a => a##defining->toOption;
+
+  let isolating = a => a##isolating->toOption;
+
+  let toDOM = a => a##toDOM->toOption;
+
+  let parseDOM = a => a##parseDOM->toOption;
+
+  let toDebugString = a => a##toDebugString->toOption;
+
+  let custom = a => a##custom->toOption;
 };
 
 module NodeType = {

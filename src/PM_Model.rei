@@ -496,6 +496,11 @@ module NodeRange: {
 };
 
 module NodeSpec: {
+  module Custom: {
+    type t;
+    let fromJs: Js.t({..}) => t;
+    let toJs: t => Js.t({..});
+  };
   /*
     marks: ?⁠string
     The marks that are allowed inside of this node. May be a space-separated string referring to mark names or groups, "_" to explicitly allow all marks, or "" to disallow marks. When not given, nodes with inline content default to allowing all marks, other nodes default to not allowing marks.
@@ -539,6 +544,29 @@ module NodeSpec: {
     Defines the default way a node of this type should be serialized to a string representation for debugging (e.g. in error messages).
    */
   type t;
+
+  let make:
+    (
+      ~content: string=?,
+      ~marks: string=?,
+      ~group: string=?,
+      ~inline: bool=?,
+      ~atom: bool=?,
+      ~attrs: Js.Dict.t(AttributeSpec.t)=?,
+      ~selectable: bool=?,
+      ~draggable: bool=?,
+      ~code: bool=?,
+      ~defining: bool=?,
+      ~isolating: bool=?,
+      ~toDOM: PM_Types.node => DOMOutputSpec.t=?,
+      ~parseDOM: array(ParseRule.t)=?,
+      ~toDebugString: PM_Types.node => string=?,
+      ~custom: Custom.t=?,
+      unit
+    ) =>
+    t;
+
+  [@ocaml.deprecated "Use `NodeSpec.make`"]
   let t:
     (
       ~content: string=?,
@@ -558,6 +586,34 @@ module NodeSpec: {
       unit
     ) =>
     t;
+
+  let content: t => option(string);
+
+  let marks: t => option(string);
+
+  let inline: t => option(bool);
+
+  let atom: t => option(bool);
+
+  let attrs: t => option(Js.Dict.t(AttributeSpec.t));
+
+  let selectable: t => option(bool);
+
+  let draggable: t => option(bool);
+
+  let code: t => option(bool);
+
+  let defining: t => option(bool);
+
+  let isolating: t => option(bool);
+
+  let toDOM: t => option(PM_Types.node => DOMOutputSpec.t);
+
+  let parseDOM: t => option(array(ParseRule.t));
+
+  let toDebugString: t => option(PM_Types.node => string);
+
+  let custom: t => option(Custom.t);
 };
 
 module NodeType: {

@@ -90,48 +90,143 @@ module Mapping = {
   [@bs.send] external appendMappingInverted: (t, ~mapping: t) => unit = "appendMappingInverted";
 };
 
-module Step = {
-  type t;
-  [@bs.send] external apply: (t, ~doc: Types.node) => StepResult.t = "apply";
-  [@bs.send] external getMap: t => StepMap.t = "getMap";
-  [@bs.send] external invert: (t, ~doc: Types.node) => t = "invert";
-  [@bs.return nullable] [@bs.send] external map: (t, ~mapping: Mapping.t) => option(t) = "map";
-  [@bs.return nullable] [@bs.send] external merge: (t, ~other: t) => option(t) = "merge";
-  [@bs.send] external toJSON: t => Js.Json.t = "toJSON";
-  [@bs.module "prosemirror-transform"] [@bs.scope "Step"]
-  external fromJSON: (Model.Schema.t, Js.Json.t) => t = "fromJSON";
-  /* REMINDER -> The type of stepClass is constructor<Step> however I am not sure how to model that
+module StepKind = {
+  type constructor;
+  [@bs.get] external constructor: Types.step => constructor = "constructor";
+  [@bs.get] external name: constructor => string = "name";
+  let className = step => step->constructor->name;
 
+  external toReplaceStep : Types.step => Types.replaceStep = "%identity";
+  external toReplaceAroundStep : Types.step => Types.replaceAroundStep = "%identity";
+  external toAddMarkStep : Types.step => Types.addMarkStep = "%identity";
+  external toRemoveMarkStep : Types.step => Types.removeMarkStep = "%identity";
+
+  type t = [
+    | `ReplaceStep(Types.replaceStep)
+    | `ReplaceAroundStep(Types.replaceAroundStep)
+    | `AddMarkStep(Types.addMarkStep)
+    | `RemoveMarkStep(Types.removeMarkStep)
+    ];
+
+  let classify =
+      (
+        step: Types.step,
+        ~custom: option((Types.step, string) => option(([> t] as 'a)))=?,
+        (),
+      )
+      : ([>t] as 'a) =>
+    switch (step->className) {
+    | "ReplaceStep" => `ReplaceStep(step->toReplaceStep)
+    | "ReplaceAroundStep" => `ReplaceAroundStep(step->toReplaceAroundStep)
+    | "AddMarkStep" => `AddMarkStep(step->toAddMarkStep)
+    | "RemoveMarkStep" => `RemoveMarkStep(step->toRemoveMarkStep)
+    | otherClassName =>
+      switch (custom->Belt.Option.flatMap(f => f(step, otherClassName))) {
+      | Some(stepSubclass) => stepSubclass
+      | None => failwith("Unknown PM.Transform.Step subclass")
+      }
+    };
+};
+
+module Step = {
+  type t = Types.step;
+  module type M = {
+    type t;
+    type inverted;
+  };
+  module type T = {
+    type t;
+    type inverted;
+    let apply: (t, ~doc: Types.node) => StepResult.t;
+    let getMap: t => StepMap.t;
+    let invert: (t, ~doc: Types.node) => inverted;
+    let map: (t, ~mapping: Mapping.t) => option(t);
+    let merge: (t, ~other: t) => option(t);
+    let toJSON: t => Js.Json.t;
+    let fromJSON: (Model.Schema.t, Js.Json.t) => t;
+    let jsonID: (~id: string, ~stepClass: t) => t;
+  };
+  module Make =
+         (M: M)
+         : (T with type t := M.t and type inverted := M.inverted) => {
+    type t = M.t;
+    type inverted = M.inverted;
+    [@bs.send] external apply: (t, ~doc: Types.node) => StepResult.t = "apply";
+    [@bs.send] external getMap: t => StepMap.t = "getMap";
+    [@bs.send] external invert: (t, ~doc: Types.node) => inverted = "invert";
+    [@bs.return nullable] [@bs.send]
+    external map: (t, ~mapping: Mapping.t) => option(t) = "map";
+    [@bs.return nullable] [@bs.send]
+    external merge: (t, ~other: t) => option(t) = "merge";
+    [@bs.send] external toJSON: t => Js.Json.t = "toJSON";
+    [@bs.module "prosemirror-transform"] [@bs.scope "Step"]
+    external fromJSON: (Model.Schema.t, Js.Json.t) => t = "fromJSON" /* REMINDER -> The type of stepClass is constructor<Step> however I am not sure how to model that
       static jsonID(id: string, selectionClass: constructor<Selection>)
       To be able to deserialize selections from JSON, custom selection classes must register
       themselves with an ID string, so that they can be disambiguated.
       Try to pick something that's unlikely to clash with classes from other modules.
-     */
-  [@bs.module "prosemirror-transform"] [@bs.scope "Step"]
-  external jsonID: (~id: string, ~stepClass: t) => t = "jsonID";
+     */;
+    [@bs.module "prosemirror-transform"] [@bs.scope "Step"]
+    external jsonID: (~id: string, ~stepClass: t) => t = "jsonID";
+  };
+  include Make({
+    type nonrec t = t;
+    type inverted = t;
+  });
+  let classify = StepKind.classify;
 };
 
 module AddMarkStep = {
-  include Step;
+  type t = Types.addMarkStep;
+  type inverted = Types.removeMarkStep;
+  include Step.Make({
+    type nonrec t = t;
+    type nonrec inverted = inverted;
+  });
   [@bs.module "prosemirror-transform"] [@bs.new]
   external make: (~from: int, ~to_: int, ~mark: Model.Mark.t) => t = "AddMarkStep";
+  [@bs.get] external from: t => int = "from";
+  [@bs.get] external to_: t => int = "to";
+  [@bs.get] external mark: t => Model.Mark.t = "mark";
 };
 
 module RemoveMarkStep = {
-  include Step;
+  type t = Types.removeMarkStep;
+  type inverted = Types.addMarkStep;
+  include Step.Make({
+    type nonrec t = t;
+    type nonrec inverted = inverted;
+  });
   [@bs.module "prosemirror-transform"] [@bs.new]
   external make: (~from: int, ~to_: int, ~mark: Model.Mark.t) => t = "RemoveMarkStep";
+  [@bs.get] external from: t => int = "from";
+  [@bs.get] external to_: t => int = "to";
+  [@bs.get] external mark: t => Model.Mark.t = "mark";
 };
 
 module ReplaceStep = {
-  include Step;
+  type t = Types.replaceStep;
+  type inverted = t;
+  include Step.Make({
+    type nonrec t = t;
+    type nonrec inverted = inverted;
+  });
   [@bs.module "prosemirror-transform"] [@bs.new]
   external make: (~from: int, ~to_: int, ~slice: Model.Slice.t, ~structure: bool=?, unit) => t =
     "ReplaceStep";
+  [@bs.get] external from: t => int = "from";
+  [@bs.get] external to_: t => int = "to";
+  [@bs.get] external slice: t => Model.Slice.t = "slice";
+  [@bs.get] external structure: t => bool = "structure";
 };
 
 module ReplaceAroundStep = {
-  include Step;
+  type t = Types.replaceAroundStep;
+  type inverted = t;
+  include Step.Make({
+    type nonrec t = t;
+    type nonrec inverted = inverted;
+  });
   [@bs.module "prosemirror-transform"] [@bs.new]
   external make:
     (
@@ -146,6 +241,13 @@ module ReplaceAroundStep = {
     ) =>
     t =
     "ReplaceAroundStep";
+  [@bs.get] external from: t => int = "from";
+  [@bs.get] external to_: t => int = "to";
+  [@bs.get] external gapFrom: t => int = "gapFrom";
+  [@bs.get] external gapTo: t => int = "gapTo";
+  [@bs.get] external slice: t => Model.Slice.t = "slice";
+  [@bs.get] external insert: t => int = "insert";
+  [@bs.get] external structure: t => bool = "structure";
 };
 
 module Transform = {

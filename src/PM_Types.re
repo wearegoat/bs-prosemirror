@@ -15,3 +15,8 @@ type editorState;
 type plugin;
 type editorView;
 type decorationSet;
+type step;
+type replaceStep;
+type replaceAroundStep;
+type addMarkStep;
+type removeMarkStep;

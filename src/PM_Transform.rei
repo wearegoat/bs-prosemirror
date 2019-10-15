@@ -175,6 +175,29 @@ module Mapping: {
   let appendMappingInverted: (t, ~mapping: t) => unit;
 };
 
+/** ProseMirror libraries rely on reflection (instanceof) for distinguishing a particular Step
+  subclass. As we don't have a straightforward reflection mechanism we have to rely on some "dirty"
+  tricks to figure out which subclass we are dealing with. It's implemented using a classify function
+  that returns the polymorphic variant corresponding to the given subclass using javascript 
+  classname underneath */
+module StepKind: {
+  type t = [
+    | `ReplaceStep(PM_Types.replaceStep)
+    | `ReplaceAroundStep(PM_Types.replaceAroundStep)
+    | `AddMarkStep(PM_Types.addMarkStep)
+    | `RemoveMarkStep(PM_Types.removeMarkStep)
+    ];
+  
+  let classify:
+    (
+      PM_Types.step,
+      ~custom: (PM_Types.step, string) => option(([> t] as 'a))=?,
+      unit
+    ) =>
+    ([> t] as 'a);
+};
+
+
 /**
 A step object represents an atomic change.
 It generally applies only to the document it was created for, since the positions stored in it
@@ -183,100 +206,105 @@ overriding the apply, invert, map, getMap and fromJSON methods, and registering 
 with a unique JSON-serialization identifier using Step.jsonID.
  */
 module Step: {
-  type t;
-  /*
-   Applies this step to the given document, returning a result object that either
-   indicates failure, if the step can not be applied to this document, or indicates success
-   by containing a transformed document.
-   apply(doc: Node) → StepResult
-   */
-  let apply: (t, ~doc: PM_Types.node) => StepResult.t;
-  /*
-    Get the step map that represents the changes made by this step,
-    and which can be used to transform between positions in the old and the new document.
-    getMap() → StepMap
-   */
-  let getMap: t => StepMap.t;
-  /*
-    Create an inverted version of this step.
-    Needs the document as it was before the step as argument.
-    invert(doc: Node) → Step
-   */
-  let invert: (t, ~doc: PM_Types.node) => t;
-  /*
-    Map this step through a mappable thing, returning either a
-    version of that step with its positions adjusted, or null if the step
-    was entirely deleted by the mapping.
-    map(mapping: Mappable) → ?⁠Step
-   */
-  let map: (t, ~mapping: Mapping.t) => option(t);
-  /*
-    Try to merge this step with another one, to be applied directly after it.
-    Returns the merged step when possible, null if the steps can't be merged.
-    merge(other: Step) → ?⁠Step
-   */
-  let merge: (t, ~other: t) => option(t);
-  /*
-    Create a JSON-serializeable representation of this step.
-    When defining this for a custom subclass, make sure the result object includes
-    the step type's JSON id under the stepType property.
-    toJSON() → Object
-   */
-  let toJSON: t => Js.Json.t;
-  /*
-    Deserialize a step from its JSON representation.
-    Will call through to the step class' own implementation of this method.
-    static fromJSON(schema: Schema, json: Object) → Step
-   */
-  let fromJSON: (PM_Model.Schema.t, Js.Json.t) => t;
-  /*
-    To be able to serialize steps to JSON, each step needs a string ID to attach
-    to its JSON representation. Use this method to register an ID for your step classes.
-    Try to pick something that's unlikely to clash with steps from other modules.
-    static jsonID(id: string, stepClass: constructor<Step>)
-   */
-  let jsonID: (~id: string, ~stepClass: t) => t;
+  type t = PM_Types.step;
+  module type M = {
+    type t;
+    type inverted;
+  };
+  module type T = {
+    type t;
+    type inverted;
+    /*
+    Applies this step to the given document, returning a result object that either
+    indicates failure, if the step can not be applied to this document, or indicates success
+    by containing a transformed document.
+    apply(doc: Node) → StepResult
+    */
+    let apply: (t, ~doc: PM_Types.node) => StepResult.t;
+    /*
+      Get the step map that represents the changes made by this step,
+      and which can be used to transform between positions in the old and the new document.
+      getMap() → StepMap
+    */
+    let getMap: t => StepMap.t;
+    /*
+      Create an inverted version of this step.
+      Needs the document as it was before the step as argument.
+      invert(doc: Node) → Step
+    */
+    let invert: (t, ~doc: PM_Types.node) => inverted;
+    /*
+      Map this step through a mappable thing, returning either a
+      version of that step with its positions adjusted, or null if the step
+      was entirely deleted by the mapping.
+      map(mapping: Mappable) → ?⁠Step
+    */
+    let map: (t, ~mapping: Mapping.t) => option(t);
+    /*
+      Try to merge this step with another one, to be applied directly after it.
+      Returns the merged step when possible, null if the steps can't be merged.
+      merge(other: Step) → ?⁠Step
+    */
+    let merge: (t, ~other: t) => option(t);
+    /*
+      Create a JSON-serializeable representation of this step.
+      When defining this for a custom subclass, make sure the result object includes
+      the step type's JSON id under the stepType property.
+      toJSON() → Object
+    */
+    let toJSON: t => Js.Json.t;
+    /*
+      Deserialize a step from its JSON representation.
+      Will call through to the step class' own implementation of this method.
+      static fromJSON(schema: Schema, json: Object) → Step
+    */
+    let fromJSON: (PM_Model.Schema.t, Js.Json.t) => t;
+    /*
+      To be able to serialize steps to JSON, each step needs a string ID to attach
+      to its JSON representation. Use this method to register an ID for your step classes.
+      Try to pick something that's unlikely to clash with steps from other modules.
+      static jsonID(id: string, stepClass: constructor<Step>)
+    */
+    let jsonID: (~id: string, ~stepClass: t) => t;
+  };
+  module Make : (M: M) => T with type t := M.t and type inverted := M.inverted;
+  include T with type t := t and type inverted := t;
+  let classify:
+    (
+      PM_Types.step,
+      ~custom: (PM_Types.step, string) => option(([> StepKind.t] as 'a))=?,
+      unit
+    ) =>
+    ([> StepKind.t] as 'a);
 };
 
 /** Add a mark to all inline content between two positions.*/
 module AddMarkStep: {
-  type t = Step.t;
-  let apply: (t, ~doc: PM_Types.node) => StepResult.t;
-  let getMap: t => StepMap.t;
-  let invert: (t, ~doc: PM_Types.node) => t;
-  let map: (t, ~mapping: Mapping.t) => option(t);
-  let merge: (t, ~other: t) => option(t);
-  let toJSON: t => Js.Json.t;
-  let fromJSON: (PM_Model.Schema.t, Js.Json.t) => t;
-  let jsonID: (~id: string, ~stepClass: t) => t;
+  type t = PM_Types.addMarkStep;
+  type inverted = PM_Types.removeMarkStep;
+  include Step.T with type t := t and type inverted := inverted;
   let make: (~from: int, ~to_: int, ~mark: PM_Model.Mark.t) => t;
+  let from: t => int;
+  let to_: t => int;
+  let mark: t => PM_Model.Mark.t;
 };
 
 /** Remove a mark from all inline content between two positions. */
 module RemoveMarkStep: {
-  type t = Step.t;
-  let apply: (t, ~doc: PM_Types.node) => StepResult.t;
-  let getMap: t => StepMap.t;
-  let invert: (t, ~doc: PM_Types.node) => t;
-  let map: (t, ~mapping: Mapping.t) => option(t);
-  let merge: (t, ~other: t) => option(t);
-  let toJSON: t => Js.Json.t;
-  let fromJSON: (PM_Model.Schema.t, Js.Json.t) => t;
-  let jsonID: (~id: string, ~stepClass: t) => t;
+  type t = PM_Types.removeMarkStep;
+  type inverted = PM_Types.addMarkStep;
+  include Step.T with type t := t and type inverted := inverted;
   let make: (~from: int, ~to_: int, ~mark: PM_Model.Mark.t) => t;
+  let from: t => int;
+  let to_: t => int;
+  let mark: t => PM_Model.Mark.t;
 };
 
 /** Replace a part of the document with a slice of new content. */
 module ReplaceStep: {
-  type t = Step.t;
-  let apply: (t, ~doc: PM_Types.node) => StepResult.t;
-  let getMap: t => StepMap.t;
-  let invert: (t, ~doc: PM_Types.node) => t;
-  let map: (t, ~mapping: Mapping.t) => option(t);
-  let merge: (t, ~other: t) => option(t);
-  let toJSON: t => Js.Json.t;
-  let fromJSON: (PM_Model.Schema.t, Js.Json.t) => t;
-  let jsonID: (~id: string, ~stepClass: t) => t;
+  type t = PM_Types.replaceStep;
+  type inverted = t;
+  include Step.T with type t := t and type inverted := inverted;
   /**
     The given slice should fit the 'gap' between from and to—the depths must line up, and the
     surrounding nodes must be able to be joined with the open sides of the slice. When structure is
@@ -286,20 +314,18 @@ module ReplaceStep: {
     new ReplaceStep(from: number, to: number, slice: Slice, structure: ?⁠bool)
    */
   let make: (~from: int, ~to_: int, ~slice: PM_Model.Slice.t, ~structure: bool=?, unit) => t;
+  let from: t => int;
+  let to_: t => int;
+  let slice: t => PM_Model.Slice.t;
+  let structure: t => bool;
 };
 
 /** Replace a part of the document with a slice of content, but preserve a range of the replaced
   content by moving it into the slice. */
 module ReplaceAroundStep: {
-  type t = Step.t;
-  let apply: (t, ~doc: PM_Types.node) => StepResult.t;
-  let getMap: t => StepMap.t;
-  let invert: (t, ~doc: PM_Types.node) => t;
-  let map: (t, ~mapping: Mapping.t) => option(t);
-  let merge: (t, ~other: t) => option(t);
-  let toJSON: t => Js.Json.t;
-  let fromJSON: (PM_Model.Schema.t, Js.Json.t) => t;
-  let jsonID: (~id: string, ~stepClass: t) => t;
+  type t = PM_Types.replaceAroundStep;
+  type inverted = t;
+  include Step.T with type t := t and type inverted := inverted;
   let make:
     (
       ~from: int,
@@ -312,6 +338,13 @@ module ReplaceAroundStep: {
       unit
     ) =>
     t;
+  let from: t => int;
+  let to_: t => int;
+  let gapFrom: t => int;
+  let gapTo: t => int;
+  let slice: t => PM_Model.Slice.t;
+  let insert: t => int;
+  let structure: t => bool;
 };
 
 /**

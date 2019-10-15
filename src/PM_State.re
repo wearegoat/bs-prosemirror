@@ -58,6 +58,40 @@ module SelectionKind = {
   let nodeSelectionToSelection: Types.nodeSelection => Types.selection = a => Obj.magic(a);
   let textSelectionToSelection: Types.textSelection => Types.selection = a => Obj.magic(a);
   let allSelectionToSelection: Types.allSelection => Types.selection = a => Obj.magic(a);
+
+  type constructor;
+  [@bs.get] external constructor: Types.selection => constructor = "constructor";
+  [@bs.get] external name: constructor => string = "name";
+  let className = selection => selection->constructor->name;
+
+  external toNodeSelection : Types.selection => Types.nodeSelection = "%identity";
+  external toTextSelection : Types.selection => Types.textSelection = "%identity";
+  external toAllSelection : Types.selection => Types.allSelection = "%identity";
+
+  type t = [
+    | `NodeSelection(Types.nodeSelection)
+    | `TextSelection(Types.textSelection)
+    | `AllSelection(Types.allSelection)
+    ];
+
+  let classify =
+      (
+        selection: Types.selection,
+        ~custom: option((Types.selection, string) => option(([> t] as 'a)))=?,
+        (),
+      )
+      : ([> t] as 'a) =>
+    switch (selection->className) {
+    | "NodeSelection" => `NodeSelection(selection->toNodeSelection)
+    | "TextSelection" => `TextSelection(selection->toTextSelection)
+    | "AllSelection" => `AllSelection(selection->toAllSelection)
+    | otherClassName =>
+      switch (custom->Belt.Option.flatMap(f => f(selection, otherClassName))) {
+      | Some(selectionSubclass) => selectionSubclass
+      | None => failwith("Unknown PM.State.Selection subclass")
+      }
+    };
+
 };
 
 module Selection = {
@@ -161,6 +195,7 @@ module Selection = {
   let fromNodeSelection = SelectionKind.nodeSelectionToSelection;
   let fromTextSelection = SelectionKind.textSelectionToSelection;
   let fromAllSelection = SelectionKind.allSelectionToSelection;
+  let classify = SelectionKind.classify;
 };
 
 module TextSelection = {

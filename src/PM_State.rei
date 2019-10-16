@@ -46,13 +46,13 @@ module SelectionKind: {
     | `TextSelection(PM_Types.textSelection)
     | `AllSelection(PM_Types.allSelection)
     ];
-  let classify:
-      (
-        PM_Types.selection,
-        ~custom: (PM_Types.selection, string) => option(([> t] as 'a))=?,
-        unit,
-      )
-      => ([> t] as 'a);
+  let classify: PM_Types.selection => t;
+  let classifyCustom:
+    (
+      PM_Types.selection,
+      ~custom: (PM_Types.selection, string) => option([> t] as 'a)
+    ) =>
+    ([> t] as 'a);
 };
 
 /** A ProseMirror selection can be one of several types. This module defines
@@ -232,13 +232,14 @@ module Selection: {
   let fromNodeSelection: PM_Types.nodeSelection => PM_Types.selection;
   let fromTextSelection: PM_Types.textSelection => PM_Types.selection;
   let fromAllSelection: PM_Types.allSelection => PM_Types.selection;
-  let classify:
+  let classify: PM_Types.selection => SelectionKind.t;
+  let classifyCustom:
     (
       PM_Types.selection,
-      ~custom: (PM_Types.selection, string) => option(([> SelectionKind.t] as 'a))=?,
-      unit,
-    )
-    => ([> SelectionKind.t] as 'a);
+      ~custom: (PM_Types.selection, string) =>
+               option([> SelectionKind.t] as 'a)
+    ) =>
+    ([> SelectionKind.t] as 'a);
 };
 
 /** A text selection represents a classical editor selection, with a head (the moving side) and

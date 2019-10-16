@@ -195,6 +195,13 @@ module StepKind: {
       unit
     ) =>
     ([> t] as 'a);
+  let replaceStepToStep: PM_Types.replaceStep => PM_Types.step;
+  let replaceAroundStepToStep: PM_Types.replaceAroundStep => PM_Types.step;
+  let addMarkStepToStep: PM_Types.addMarkStep => PM_Types.step;
+  let removeMarkStepToStep: PM_Types.removeMarkStep => PM_Types.step;
+  let toStep: t => PM_Types.step;
+  let toStepCustom:
+    (~custom: ([> t] as 'a) => PM_Types.step, [> t] as 'a) => PM_Types.step;
 };
 
 
@@ -268,21 +275,29 @@ module Step: {
     let jsonID: (~id: string, ~stepClass: t) => t;
   };
   module Make : (M: M) => T with type t := M.t and type inverted := M.inverted;
+  module type Subclass = {
+    include T;
+    let toStep: t => PM_Types.step;
+  };
   include T with type t := t and type inverted := t;
   let classify:
     (
       PM_Types.step,
-      ~custom: (PM_Types.step, string) => option(([> StepKind.t] as 'a))=?,
+      ~custom: (PM_Types.step, string) => option([> StepKind.t] as 'a)=?,
       unit
     ) =>
     ([> StepKind.t] as 'a);
+  let toStep: StepKind.t => PM_Types.step;
+  let toStepCustom:
+    (~custom: ([> StepKind.t] as 'a) => PM_Types.step, [> StepKind.t] as 'a) =>
+    PM_Types.step;
 };
 
 /** Add a mark to all inline content between two positions.*/
 module AddMarkStep: {
   type t = PM_Types.addMarkStep;
   type inverted = PM_Types.removeMarkStep;
-  include Step.T with type t := t and type inverted := inverted;
+  include Step.Subclass with type t := t and type inverted := inverted;
   let make: (~from: int, ~to_: int, ~mark: PM_Model.Mark.t) => t;
   let from: t => int;
   let to_: t => int;
@@ -293,7 +308,7 @@ module AddMarkStep: {
 module RemoveMarkStep: {
   type t = PM_Types.removeMarkStep;
   type inverted = PM_Types.addMarkStep;
-  include Step.T with type t := t and type inverted := inverted;
+  include Step.Subclass with type t := t and type inverted := inverted;
   let make: (~from: int, ~to_: int, ~mark: PM_Model.Mark.t) => t;
   let from: t => int;
   let to_: t => int;
@@ -304,7 +319,7 @@ module RemoveMarkStep: {
 module ReplaceStep: {
   type t = PM_Types.replaceStep;
   type inverted = t;
-  include Step.T with type t := t and type inverted := inverted;
+  include Step.Subclass with type t := t and type inverted := inverted;
   /**
     The given slice should fit the 'gap' between from and to—the depths must line up, and the
     surrounding nodes must be able to be joined with the open sides of the slice. When structure is
@@ -325,7 +340,7 @@ module ReplaceStep: {
 module ReplaceAroundStep: {
   type t = PM_Types.replaceAroundStep;
   type inverted = t;
-  include Step.T with type t := t and type inverted := inverted;
+  include Step.Subclass with type t := t and type inverted := inverted;
   let make:
     (
       ~from: int,

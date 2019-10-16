@@ -188,11 +188,11 @@ module StepKind: {
     | `RemoveMarkStep(PM_Types.removeMarkStep)
     ];
   
-  let classify:
+  let classify : PM_Types.step => [ t];
+  let classifyCustom:
     (
       PM_Types.step,
-      ~custom: (PM_Types.step, string) => option(([> t] as 'a))=?,
-      unit
+      ~custom: (PM_Types.step, string) => option(([> t] as 'a))
     ) =>
     ([> t] as 'a);
   let replaceStepToStep: PM_Types.replaceStep => PM_Types.step;
@@ -280,11 +280,11 @@ module Step: {
     let toStep: t => PM_Types.step;
   };
   include T with type t := t and type inverted := t;
-  let classify:
+  let classify: PM_Types.step => [ StepKind.t];
+  let classifyCustom:
     (
       PM_Types.step,
-      ~custom: (PM_Types.step, string) => option([> StepKind.t] as 'a)=?,
-      unit
+      ~custom: (PM_Types.step, string) => option([> StepKind.t] as 'a)
     ) =>
     ([> StepKind.t] as 'a);
   let toStep: StepKind.t => PM_Types.step;

@@ -108,22 +108,26 @@ module StepKind = {
     | `RemoveMarkStep(Types.removeMarkStep)
     ];
 
-  let classify =
-      (
-        step: Types.step,
-        ~custom: option((Types.step, string) => option(([> t] as 'a)))=?,
-        (),
-      )
-      : ([>t] as 'a) =>
+  let classify = (step: Types.step): [> t] =>
     switch (step->className) {
     | "ReplaceStep" => `ReplaceStep(step->toReplaceStep)
     | "ReplaceAroundStep" => `ReplaceAroundStep(step->toReplaceAroundStep)
     | "AddMarkStep" => `AddMarkStep(step->toAddMarkStep)
     | "RemoveMarkStep" => `RemoveMarkStep(step->toRemoveMarkStep)
-    | otherClassName =>
-      switch (custom->Belt.Option.flatMap(f => f(step, otherClassName))) {
+    | _ => failwith("Unknown PM.Transform.Step subclass")
+    };
+
+  let classifyCustom =
+      (
+        step: Types.step,
+        ~custom: (Types.step, string) => option([> t] as 'a),
+      )
+      : ([> t] as 'a) =>
+    try (classify(step)) {
+    | Failure(_) as f =>
+      switch (custom(step, step->className)) {
       | Some(stepSubclass) => stepSubclass
-      | None => failwith("Unknown PM.Transform.Step subclass")
+      | None => raise(f)
       }
     };
 
@@ -199,6 +203,7 @@ module Step = {
     type inverted = t;
   });
   let classify = StepKind.classify;
+  let classifyCustom = StepKind.classifyCustom;
   let toStep = StepKind.toStep;
   let toStepCustom = StepKind.toStepCustom;
 };

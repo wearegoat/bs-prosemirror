@@ -74,21 +74,25 @@ module SelectionKind = {
     | `AllSelection(Types.allSelection)
     ];
 
-  let classify =
-      (
-        selection: Types.selection,
-        ~custom: option((Types.selection, string) => option(([> t] as 'a)))=?,
-        (),
-      )
-      : ([> t] as 'a) =>
+  let classify = (selection: Types.selection): [> t] =>
     switch (selection->className) {
     | "NodeSelection" => `NodeSelection(selection->toNodeSelection)
     | "TextSelection" => `TextSelection(selection->toTextSelection)
     | "AllSelection" => `AllSelection(selection->toAllSelection)
-    | otherClassName =>
-      switch (custom->Belt.Option.flatMap(f => f(selection, otherClassName))) {
+    | _ => failwith("Unknown PM.State.Selection subclass")
+    };
+
+  let classifyCustom =
+      (
+        selection: Types.selection,
+        ~custom: (Types.selection, string) => option([> t] as 'a),
+      )
+      : ([> t] as 'a) =>
+    try (classify(selection)) {
+    | Failure(_) as f =>
+      switch (custom(selection, selection->className)) {
       | Some(selectionSubclass) => selectionSubclass
-      | None => failwith("Unknown PM.State.Selection subclass")
+      | None => raise(f)
       }
     };
 
@@ -196,6 +200,7 @@ module Selection = {
   let fromTextSelection = SelectionKind.textSelectionToSelection;
   let fromAllSelection = SelectionKind.allSelectionToSelection;
   let classify = SelectionKind.classify;
+  let classifyCustom = SelectionKind.classifyCustom;
 };
 
 module TextSelection = {

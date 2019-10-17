@@ -108,23 +108,48 @@ module StepKind = {
     | `RemoveMarkStep(Types.removeMarkStep)
     ];
 
-  let classify =
-      (
-        step: Types.step,
-        ~custom: option((Types.step, string) => option(([> t] as 'a)))=?,
-        (),
-      )
-      : ([>t] as 'a) =>
+  let classify = (step: Types.step): [> t] =>
     switch (step->className) {
     | "ReplaceStep" => `ReplaceStep(step->toReplaceStep)
     | "ReplaceAroundStep" => `ReplaceAroundStep(step->toReplaceAroundStep)
     | "AddMarkStep" => `AddMarkStep(step->toAddMarkStep)
     | "RemoveMarkStep" => `RemoveMarkStep(step->toRemoveMarkStep)
-    | otherClassName =>
-      switch (custom->Belt.Option.flatMap(f => f(step, otherClassName))) {
+    | _ => failwith("Unknown PM.Transform.Step subclass")
+    };
+
+  let classifyCustom =
+      (
+        step: Types.step,
+        ~custom: (Types.step, string) => option([> t] as 'a),
+      )
+      : ([> t] as 'a) =>
+    try (classify(step)) {
+    | Failure(_) as f =>
+      switch (custom(step, step->className)) {
       | Some(stepSubclass) => stepSubclass
-      | None => failwith("Unknown PM.Transform.Step subclass")
+      | None => raise(f)
       }
+    };
+
+  external replaceStepToStep : Types.replaceStep => Types.step = "%identity";
+  external replaceAroundStepToStep : Types.replaceAroundStep => Types.step = "%identity";
+  external addMarkStepToStep : Types.addMarkStep => Types.step = "%identity";
+  external removeMarkStepToStep : Types.removeMarkStep => Types.step = "%identity";
+
+  let toStep : t => Types.step = fun
+    | `ReplaceStep(step) => step->replaceStepToStep
+    | `ReplaceAroundStep(step) => step->replaceAroundStepToStep
+    | `AddMarkStep(step) => step->addMarkStepToStep
+    | `RemoveMarkStep(step) => step->removeMarkStepToStep;
+
+  let toStepCustom = (~custom: ([>t] as 'a) => Types.step, step : ([>t] as 'a)) =>
+    switch (step) {
+    | (
+        `ReplaceStep(_) | `ReplaceAroundStep(_) | `AddMarkStep(_) |
+        `RemoveMarkStep(_)
+      ) as t =>
+      toStep(t)
+    | other => custom(other)
     };
 };
 
@@ -169,11 +194,18 @@ module Step = {
     [@bs.module "prosemirror-transform"] [@bs.scope "Step"]
     external jsonID: (~id: string, ~stepClass: t) => t = "jsonID";
   };
+  module type Subclass = {
+    include T;
+    let toStep: t => Types.step;
+  };
   include Make({
     type nonrec t = t;
     type inverted = t;
   });
   let classify = StepKind.classify;
+  let classifyCustom = StepKind.classifyCustom;
+  let toStep = StepKind.toStep;
+  let toStepCustom = StepKind.toStepCustom;
 };
 
 module AddMarkStep = {
@@ -183,6 +215,7 @@ module AddMarkStep = {
     type nonrec t = t;
     type nonrec inverted = inverted;
   });
+  let toStep = StepKind.addMarkStepToStep;
   [@bs.module "prosemirror-transform"] [@bs.new]
   external make: (~from: int, ~to_: int, ~mark: Model.Mark.t) => t = "AddMarkStep";
   [@bs.get] external from: t => int = "from";
@@ -197,6 +230,7 @@ module RemoveMarkStep = {
     type nonrec t = t;
     type nonrec inverted = inverted;
   });
+  let toStep = StepKind.removeMarkStepToStep;
   [@bs.module "prosemirror-transform"] [@bs.new]
   external make: (~from: int, ~to_: int, ~mark: Model.Mark.t) => t = "RemoveMarkStep";
   [@bs.get] external from: t => int = "from";
@@ -211,6 +245,7 @@ module ReplaceStep = {
     type nonrec t = t;
     type nonrec inverted = inverted;
   });
+  let toStep = StepKind.replaceStepToStep;
   [@bs.module "prosemirror-transform"] [@bs.new]
   external make: (~from: int, ~to_: int, ~slice: Model.Slice.t, ~structure: bool=?, unit) => t =
     "ReplaceStep";
@@ -227,6 +262,7 @@ module ReplaceAroundStep = {
     type nonrec t = t;
     type nonrec inverted = inverted;
   });
+  let toStep = StepKind.replaceAroundStepToStep;
   [@bs.module "prosemirror-transform"] [@bs.new]
   external make:
     (

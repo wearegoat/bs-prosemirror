@@ -493,7 +493,7 @@ module SchemaSpec = {
 };
 
 module Schema = {
-  type t;
+  type t = Types.schema;
   [@bs.get] external nodes: t => Js.Dict.t(Types.nodeType) = "nodes";
   [@bs.get] external marks: t => Js.Dict.t(Types.markType) = "marks";
   [@bs.get] external spec: t => SchemaSpec.t = "spec";

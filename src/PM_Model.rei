@@ -923,7 +923,7 @@ module Schema: {
   /*
      A document schema. Holds node and mark type objects for the nodes and marks that may occur in conforming documents, and provides functionality for creating and deserializing such documents.
    */
-  type t;
+  type t = PM_Types.schema;
 
   /*
    An object mapping the schema's node names to node type objects.

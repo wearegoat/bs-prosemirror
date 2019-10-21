@@ -221,52 +221,52 @@ module Step: {
   module type T = {
     type t;
     type inverted;
-    /*
+    /**
     Applies this step to the given document, returning a result object that either
     indicates failure, if the step can not be applied to this document, or indicates success
     by containing a transformed document.
     apply(doc: Node) → StepResult
     */
     let apply: (t, ~doc: PM_Types.node) => StepResult.t;
-    /*
+    /**
       Get the step map that represents the changes made by this step,
       and which can be used to transform between positions in the old and the new document.
       getMap() → StepMap
     */
     let getMap: t => StepMap.t;
-    /*
+    /**
       Create an inverted version of this step.
       Needs the document as it was before the step as argument.
       invert(doc: Node) → Step
     */
     let invert: (t, ~doc: PM_Types.node) => inverted;
-    /*
+    /**
       Map this step through a mappable thing, returning either a
       version of that step with its positions adjusted, or null if the step
       was entirely deleted by the mapping.
       map(mapping: Mappable) → ?⁠Step
     */
     let map: (t, ~mapping: Mapping.t) => option(t);
-    /*
+    /**
       Try to merge this step with another one, to be applied directly after it.
       Returns the merged step when possible, null if the steps can't be merged.
       merge(other: Step) → ?⁠Step
     */
     let merge: (t, ~other: t) => option(t);
-    /*
+    /**
       Create a JSON-serializeable representation of this step.
       When defining this for a custom subclass, make sure the result object includes
       the step type's JSON id under the stepType property.
       toJSON() → Object
     */
     let toJSON: t => Js.Json.t;
-    /*
+    /**
       Deserialize a step from its JSON representation.
       Will call through to the step class' own implementation of this method.
       static fromJSON(schema: Schema, json: Object) → Step
     */
     let fromJSON: (PM_Model.Schema.t, Js.Json.t) => t;
-    /*
+    /**
       To be able to serialize steps to JSON, each step needs a string ID to attach
       to its JSON representation. Use this method to register an ID for your step classes.
       Try to pick something that's unlikely to clash with steps from other modules.

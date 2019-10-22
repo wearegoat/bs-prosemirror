@@ -701,6 +701,13 @@ module Transaction: {
    */
   let scrollIntoView: t => t;
 
+  /**
+    Returns true if the editor should scroll the selection into view
+    when updated to the state produced by this transaction.
+    scrolledIntoView: bool
+   */
+  let scrolledIntoView: t => bool;
+
   module Meta : {
     module type T = {
 

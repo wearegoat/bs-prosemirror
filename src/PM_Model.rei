@@ -6,11 +6,11 @@ module Attrs: {
 };
 
 module AttributeSpec: {
-  /*
+  /**
     Used to define attributes on nodes or marks.
    */
   type t;
-  /*
+  /**
     The default value for this attribute, to use when no explicit value is provided. Attributes that have no default must be provided whenever a node or mark of a type that has them is created.
     default: ?⁠any
    */
@@ -18,7 +18,7 @@ module AttributeSpec: {
 };
 
 module DOMOutputSpec: {
-  /*
+  /**
     A description of a DOM structure. Can be either a string, which is interpreted as a text node,
     a DOM node, which is interpreted as itself, or an array. An array describes a DOM element.
     The first value in the array should be a string—the name of the DOM element.
@@ -36,16 +36,16 @@ module DOMOutputSpec: {
     | Hole: spec;
 
   type t;
-  /*
+  /**
     Creates text node
    */
   let fromString: string => t;
 
-  /*
+  /**
     Creates a node from a DOM node
    */
   let fromDomNode: Dom.node => t;
-  /*
+  /**
     Creates a node from a spec
     ```
     Node("div", Attrs.make({ "class": "test" }), Node("span", Attrs.empty, Hole)) |> fromSpec
@@ -56,12 +56,12 @@ module DOMOutputSpec: {
 };
 
 module DOMSerializer: {
-  /*
+  /**
     A DOM serializer knows how to convert ProseMirror nodes and marks of various types to DOM nodes.
    */
   type t;
 
-  /*
+  /**
    Create a serializer. nodes should map node names to functions that take a node
    and return a description of the corresponding DOM. marks does the same for mark names,
    but also gets an argument that tells it whether the mark's content is block
@@ -76,32 +76,32 @@ module DOMSerializer: {
     ) =>
     t;
 
-  /*
+  /**
    The node serialization functions.
    nodes: Object<fn(node: Node) → DOMOutputSpec>
    */
   let nodes: t => Js.Dict.t(PM_Types.node => DOMOutputSpec.t);
 
-  /*
+  /**
    The mark serialization functions.
    marks: Object<?⁠fn(mark: Mark, inline: bool) → DOMOutputSpec>
    */
   let marks: t => Js.Dict.t((PM_Types.mark, ~inline: bool) => DOMOutputSpec.t);
 
-  /*
+  /**
    Serialize the content of this fragment to a DOM fragment. When not in the browser, the document option, containing a DOM document, should be passed so that the serializer can create nodes.
    serializeFragment(fragment: Fragment, options: ?⁠Object = {}) → dom.DocumentFragment
    */
   let serializeFragment:
     (t, ~fragment: PM_Types.fragment, ~options: Js.t({..})=?, unit) => Dom.documentFragment;
 
-  /*
+  /**
    Serialize this node to a DOM node. This can be useful when you need to serialize a part of a document, as opposed to the whole document. To serialize a whole document, use serializeFragment on its content.
    serializeNode(node: Node, options: ?⁠Object = {}) → dom.Node
    */
   let serializeNode: (t, ~node: PM_Types.node, ~options: Js.t({..})=?, unit) => Dom.node;
 
-  /*
+  /**
    Render an output spec to a DOM node. If the spec has a hole (zero) in it, contentDOM will point at the node with the hole.
    static renderSpec(doc: dom.Document, structure: DOMOutputSpec) → {dom: dom.Node, contentDOM: ?⁠dom.Node}
    */
@@ -113,7 +113,7 @@ module DOMSerializer: {
       "dom": Dom.node,
     };
 
-  /*
+  /**
    Build a serializer using the toDOM properties in a schema's node and mark specs.
    static fromSchema(schema: Schema) → DOMSerializer
    */
@@ -121,7 +121,7 @@ module DOMSerializer: {
 };
 
 module ParseRule: {
-  /*
+  /**
    A value that describes how to parse a given DOM node or inline style as a ProseMirror node or mark.
 
    tag: ?⁠string
@@ -201,7 +201,7 @@ module ParseRule: {
 };
 
 module Mark: {
-  /*
+  /**
      A mark is a piece of information that can be attached to a node, such as it being emphasized,
      in code font, or a link. It has a type and optionally a set of attributes that provide
      further information (such as the target of the link). Marks are created through a Schema,
@@ -209,19 +209,19 @@ module Mark: {
    */
   type t = PM_Types.mark;
 
-  /*
+  /**
     The type of this mark.
     type: MarkType
    */
   let type_: t => PM_Types.markType;
 
-  /*
+  /**
     The attributes associated with this mark.
     attrs: Object
    */
   let attrs: t => Attrs.t;
 
-  /*
+  /**
    Given a set of marks, create a new set which contains this one as well,
    in the right position. If this mark is already in the set, the set itself is returned.
    If any marks that are set to be exclusive with this mark are present,
@@ -230,50 +230,50 @@ module Mark: {
    */
   let addToSet: (t, array(t)) => array(t);
 
-  /*
+  /**
    Remove this mark from the given set, returning a new set.
    If this mark is not in the set, the set itself is returned.
    removeFromSet(set: [Mark]) → [Mark]
    */
   let removeFromSet: (t, array(t)) => array(t);
 
-  /*
+  /**
    Test whether this mark is in the given set of marks.
    isInSet(set: [Mark]) → bool
    */
   let isInSet: (t, array(t)) => bool;
 
-  /*
+  /**
    Test whether this mark has the same type and attributes as another mark.
    eq(other: Mark) → bool
    */
   let eq: (t, t) => bool;
 
-  /*
+  /**
    Convert this mark to a JSON-serializeable representation.
    toJSON() → Object
    */
   let toJSON: t => Js.Json.t;
 
-  /*
+  /**
     type: MarkType
     The type of this mark.
    */
   let fromJSON: (~schema: PM_Types.schema, ~json: Js.Json.t) => t;
 
-  /*
+  /**
    Test whether two sets of marks are identical.
    static sameSet(a: [Mark], b: [Mark]) → bool
    */
   let sameSet: (~a: array(t), ~b: array(t)) => bool;
 
-  /*
+  /**
    Create a properly sorted mark set from null, a single mark, or an unsorted array of marks.
    static setFrom(marks: ?⁠Mark | [Mark]) → [Mark]
    */
   let setFromArray: array(t) => array(t);
 
-  /*
+  /**
    The empty set of marks.
    static none: [Mark]
    */
@@ -281,7 +281,7 @@ module Mark: {
 };
 
 module Slice: {
-  /*
+  /**
    A slice represents a piece cut out of a larger document.
    It stores not only a fragment, but also the depth up to which nodes on both side are ‘open’
    (cut through). It is not necessary for the content of open nodes to conform to the schema's
@@ -290,7 +290,7 @@ module Slice: {
    */
 
   type t;
-  /*
+  /**
     Create a slice. When specifying a non-zero open depth,
     you must make sure that there are nodes of at least that depth
     at the appropriate side of the fragment—i.e. if the fragment is an empty paragraph node,
@@ -299,56 +299,56 @@ module Slice: {
    */
   let make: (~content: PM_Types.fragment, ~openStart: int, ~openEnd: int) => t;
 
-  /*
+  /**
     The slice's content.
     content: Fragment
    */
   let content: t => PM_Types.fragment;
 
-  /*
+  /**
     The open depth at the start.
     openStart: number
    */
   let openStart: t => int;
 
-  /*
+  /**
     The open depth at the end.
     openEnd: number
    */
   let openEnd: t => int;
 
-  /*
+  /**
     The size this slice would add when inserted into a document.
     size: number
    */
   let size: t => int;
 
-  /*
+  /**
     Tests whether this slice is equal to another slice.
     eq(other: Slice) → bool
    */
   let eq: (t, t) => bool;
 
-  /*
+  /**
     Convert a slice to a JSON-serializable representation.
     toJSON() → ?⁠Object
    */
   let toJSON: t => Js.Json.t;
 
-  /*
+  /**
     Deserialize a slice from its JSON representation.
     static fromJSON(schema: Schema, json: ?⁠Object) → Slice
    */
   let fromJSON: (~schema: PM_Types.schema, ~json: Js.Json.t) => t;
 
-  /*
+  /**
    Create a slice from a fragment by taking the maximum possible
    open value on both side of the fragment.
    static maxOpen(fragment: Fragment, openIsolating: ?⁠bool = true) → Slice
    */
   let maxOpen: (~fragment: PM_Types.fragment, ~openIsolating: bool=?) => t;
 
-  /*
+  /**
    The empty slice.
    static empty: Slice
    */
@@ -356,39 +356,39 @@ module Slice: {
 };
 
 module ContentMatch: {
-  /*
+  /**
    Instances of this class represent a match state of a node type's content expression,
    and can be used to find out whether further content matches here,
    and whether a given position is a valid end of the node.
    */
   type t;
 
-  /*
+  /**
     True when this match state represents a valid end of the node.
     validEnd: bool
    */
   let validEnd: t => bool;
 
-  /*
+  /**
     Match a node type, returning a match after that node if successful.
     matchType(type: NodeType) → ?⁠ContentMatch
    */
   let matchType: (t, PM_Types.nodeType) => option(t);
 
-  /*
+  /**
     Try to match a fragment. Returns the resulting match when successful.
     matchFragment(frag: Fragment, start: ?⁠number = 0, end: ?⁠number = frag.childCount) → ?⁠ContentMatch
    */
   let matchFragment:
     (t, ~frag: PM_Types.fragment, ~start: int=?, ~end_: int=?, unit) => option(t);
 
-  /*
+  /**
     Get the first matching node type at this match position that can be generated.
     defaultType: ?⁠NodeType
    */
   let defaultType: t => option(PM_Types.nodeType);
 
-  /*
+  /**
     Try to match the given fragment, and if that fails, see if it can be made to match
     by inserting nodes in front of it. When successful, return a fragment of inserted nodes
     (which may be empty if nothing had to be inserted). When toEnd is true, only return
@@ -399,7 +399,7 @@ module ContentMatch: {
     (t, ~after: PM_Types.fragment, ~toEnd: bool=?, ~startIndex: int=?, unit) =>
     option(PM_Types.fragment);
 
-  /*
+  /**
     Find a set of wrapping node types that would allow a node of the given type
     to appear at this position. The result may be empty (when it fits directly) and will be null
     when no such wrapping exists.
@@ -407,14 +407,14 @@ module ContentMatch: {
    */
   let findWrapping: (t, PM_Types.nodeType) => option(array(PM_Types.nodeType));
 
-  /*
+  /**
     The number of outgoing edges this node has in the finite automaton
     that describes the content expression.
     edgeCount: number
    */
   let edgeCount: t => int;
 
-  /*
+  /**
    Get the _n_th outgoing edge from this node in the finite automaton
    that describes the content expression.
    edge(n: number) → {type: NodeType, next: ContentMatch}
@@ -429,12 +429,12 @@ module ContentMatch: {
 };
 
 module NodeRange: {
-  /*
+  /**
      Represents a flat range of content, i.e. one that starts and ends in the same node.
    */
   type t = PM_Types.nodeRange;
 
-  /*
+  /**
    Construct a node range.
    $from and $to should point into the same node until at least the given depth,
    since a node range denotes an adjacent set of nodes in a single parent node.
@@ -443,7 +443,7 @@ module NodeRange: {
   let make:
     (~resolvedFrom: PM_Types.resolvedPos, ~resolvedTo: PM_Types.resolvedPos, ~depth: int) => t;
 
-  /*
+  /**
    A resolved position along the start of the content.
    May have a depth greater than this object's depth property,
    since these are the positions that were used to compute the range,
@@ -452,43 +452,43 @@ module NodeRange: {
    */
   let resolvedFrom: t => PM_Types.resolvedPos;
 
-  /*
+  /**
    A position along the end of the content. See caveat for $from.
    $to: ResolvedPos
    */
   let resolvedTo: t => PM_Types.resolvedPos;
 
-  /*
+  /**
    The depth of the node that this range points into.
    depth: number
    */
   let depth: t => int;
 
-  /*
+  /**
    The position at the start of the range.
    start: number
    */
   let start: t => int;
 
-  /*
+  /**
    The position at the end of the range.
    end: number
    */
   let end_: t => int;
 
-  /*
+  /**
    The parent node that the range points into.
    parent: Node
    */
   let parent: t => PM_Types.node;
 
-  /*
+  /**
    The start index of the range in the parent node.
    startIndex: number
    */
   let startIndex: t => int;
 
-  /*
+  /**
    endIndex: number
     The end index of the range in the parent node.
     */
@@ -501,7 +501,7 @@ module NodeSpec: {
     let fromJs: Js.t({..}) => t;
     let toJs: t => Js.t({..});
   };
-  /*
+  /**
     marks: ?⁠string
     The marks that are allowed inside of this node. May be a space-separated string referring to mark names or groups, "_" to explicitly allow all marks, or "" to disallow marks. When not given, nodes with inline content default to allowing all marks, other nodes default to not allowing marks.
 
@@ -617,7 +617,7 @@ module NodeSpec: {
 };
 
 module NodeType: {
-  /*
+  /**
    Node types are objects allocated once per Schema and used to tag Node instances.
    They contain information about the node type,
    such as its name and what kind of node it represents.
@@ -625,74 +625,74 @@ module NodeType: {
 
   type t = PM_Types.nodeType;
 
-  /*
+  /**
     The name the node type has in this schema.
     name: string
    */
   let name: t => string;
 
-  /*
+  /**
    A link back to the Schema the node type belongs to.
    schema: Schema
    */
   let schema: t => PM_Types.schema;
 
-  /*
+  /**
     The spec that this type is based on
     spec: NodeSpec
    */
   let spec: t => NodeSpec.t;
 
-  /*
+  /**
    The starting match of the node type's content expression.
    contentMatch: ContentMatch
    */
   let contentMatch: t => ContentMatch.t;
 
-  /*
+  /**
    True if this node type has inline content.
    `inlineContent` in Prosemirror API
    inlineContent: bool
    */
   let hasInlineContent: t => bool;
 
-  /*
+  /**
    True if this is a block type
    isBlock: bool
    */
   let isBlock: t => bool;
 
-  /*
+  /**
    True if this is the text node type
    isText: bool
    */
   let isText: t => bool;
 
-  /*
+  /**
    True if this is an inline type.
    isInline: bool
    */
   let isInline: t => bool;
 
-  /*
+  /**
    True if this is a textblock type, a block that contains inline content.
    isTextblock: bool
    */
   let isTextBlock: t => bool;
 
-  /*
+  /**
    isLeaf: bool
    True for node types that allow no content.
    */
   let isLeaf: t => bool;
 
-  /*
+  /**
       True when this node is an atom, i.e. when it does not have directly editable content.
       isAtom: bool
    */
   let isAtom: t => bool;
 
-  /*
+  /**
       Create a Node of this type.
       The given attributes are checked and defaulted
       (you can pass null to use the type's defaults entirely, if no required attributes exist).
@@ -715,7 +715,7 @@ module NodeType: {
     ) =>
     PM_Types.node;
 
-  /*
+  /**
    Like create, but check the given content against the node type's content restrictions,
    and throw an error if it doesn't match.
    createChecked(attrs: ?⁠Object, content: ?⁠Fragment | Node | [Node], marks: ?⁠[Mark]) → Node
@@ -735,7 +735,7 @@ module NodeType: {
     ) =>
     PM_Types.node;
 
-  /*
+  /**
     Like create, but see if it is necessary to add nodes to the start or end
     of the given fragment to make it fit the node. If no fitting wrapping can be found,
     return null. Note that, due to the fact that required nodes can always be created,
@@ -757,31 +757,31 @@ module NodeType: {
     ) =>
     option(PM_Types.node);
 
-  /*
+  /**
    Returns true if the given fragment is valid content for this node type with the given attributes.
    validContent(content: Fragment) → bool
    */
   let validContent: (t, ~content: PM_Types.fragment) => bool;
 
-  /*
+  /**
    Check whether the given mark type is allowed in this node.
    allowsMarkType(markType: MarkType) → bool
    */
   let allowsMarkType: (t, ~markType: PM_Types.markType) => bool;
 
-  /*
+  /**
     Test whether the given set of marks are allowed in this node.
     allowsMarks(marks: [Mark]) → bool
    */
   let allowsMarks: (t, ~marks: array(PM_Types.mark)) => bool;
 
-  /*
+  /**
    Removes the marks that are not allowed in this node from the given set.
    allowedMarks(marks: [Mark]) → [Mark]
    */
   let allowedMarks: (t, ~marks: array(PM_Types.mark)) => array(PM_Types.mark);
 
-  /*
+  /**
    This is not referenced in the Prosemirror documentation however it is used by offical plugins.
    Such as: prosemirror-shema-list, prosemirror-model, prosemirror-commands
    */
@@ -789,7 +789,7 @@ module NodeType: {
 };
 
 module MarkSpec: {
-  /*
+  /**
    attrs: ?⁠Object<AttributeSpec>
    The attributes that marks of this type get.
 
@@ -829,30 +829,30 @@ module MarkSpec: {
 };
 
 module MarkType: {
-  /*
+  /**
    Like nodes, marks (which are associated with nodes to signify things like emphasis
    or being part of a link) are tagged with type objects, which are instantiated once per Schema.
    */
   type t = PM_Types.markType;
-  /*
+  /**
    The name of the mark type.
    name: string
    */
   let name: t => string;
 
-  /*
+  /**
    The schema that this mark type instance is part of.
    schema: Schema
    */
   let schema: t => PM_Types.schema;
 
-  /*
+  /**
    The spec on which the type is based.
    spec: MarkSpec
    */
   let spec: t => MarkSpec.t;
 
-  /*
+  /**
    Create a mark of this type.
    attrs may be null or an object containing only some of the mark's attributes.
    The others, if they have defaults, will be added.
@@ -860,14 +860,14 @@ module MarkType: {
    */
   let create: (t, ~attrs: Attrs.t=?, unit) => PM_Types.mark;
 
-  /*
+  /**
    When there is a mark of this type in the given set, a new set without it is returned.
    Otherwise, the input set is returned.
    removeFromSet(set: [Mark]) → [Mark]
    */
   let removeFromSet: (t, ~set: array(PM_Types.mark)) => array(PM_Types.mark);
 
-  /*
+  /**
    Tests whether there is a mark of this type in the given set.
    This is a deceptive function. The name suggests that this is a predicate.
    However it gets a mark from the array that corresponds to the MarkType that
@@ -876,7 +876,7 @@ module MarkType: {
    */
   let isInSet: (t, array(PM_Types.mark)) => option(PM_Types.mark);
 
-  /*
+  /**
    Queries whether a given mark type is excluded by this one.
    excludes(other: MarkType) → bool
    */
@@ -884,7 +884,7 @@ module MarkType: {
 };
 
 module SchemaSpec: {
-  /*
+  /**
      An object describing a schema, as passed to the Schema constructor.
    */
   type t;
@@ -897,7 +897,7 @@ module SchemaSpec: {
     ) =>
     t;
 
-  /*
+  /**
      The node types in this schema. Maps names to NodeSpec objects that describe the node type
      associated with that name. Their order is significant—it determines which parse rules take
      precedence by default, and which nodes come first in a given group.
@@ -905,14 +905,14 @@ module SchemaSpec: {
    */
   let nodesGet: t => OrderedMap.t(NodeSpec.t);
 
-  /*
+  /**
      The mark types that exist in this schema. The order in which they are provided determines the
      order in which mark sets are sorted and in which parse rules are tried.
      marks: ?⁠Object<MarkSpec> | OrderedMap<MarkSpec>
    */
   let marksGet: t => OrderedMap.t(MarkSpec.t);
 
-  /*
+  /**
      The name of the default top-level node for the schema. Defaults to "doc".
      topNode: ?⁠string
    */
@@ -920,44 +920,44 @@ module SchemaSpec: {
 };
 
 module Schema: {
-  /*
+  /**
      A document schema. Holds node and mark type objects for the nodes and marks that may occur in conforming documents, and provides functionality for creating and deserializing such documents.
    */
   type t = PM_Types.schema;
 
-  /*
+  /**
    An object mapping the schema's node names to node type objects.
    nodes: Object<NodeType>
    */
   let nodes: t => Js.Dict.t(PM_Types.nodeType);
 
-  /*
+  /**
    A map from mark names to mark type objects.
    marks: Object<MarkType>
     */
   let marks: t => Js.Dict.t(PM_Types.markType);
 
-  /*
+  /**
    The spec on which the schema is based, with the added guarantee
    that its nodes and marks properties are OrderedMap instances (not raw objects).
    spec: SchemaSpec
    */
   let spec: t => SchemaSpec.t;
 
-  /*
+  /**
    The type of the default top node for this schema.
    topNodeType: NodeType
    */
   let topNodeType: t => PM_Types.nodeType;
 
-  /*
+  /**
    An object for storing whatever values modules may want to compute and cache per schema.
    (If you want to store something in it, try to use property names unlikely to clash.)
    cached: Object
    */
   let cached: t => Attrs.t;
 
-  /*
+  /**
    Create a node in this schema. The type may be a string or a NodeType instance.
    Attributes will be extended with defaults, content may be a Fragment, null, a Node,
    or an array of nodes.
@@ -978,13 +978,13 @@ module Schema: {
     ) =>
     PM_Types.node;
 
-  /*
+  /**
    Create a text node in the schema. Empty text nodes are not allowed.
    text(text: string, marks: ?⁠[Mark]) → Node
    */
   let text: (t, ~text: string, ~marks: array(PM_Types.mark)=?, unit) => PM_Types.node;
 
-  /*
+  /**
    Create a mark with the given type and attributes.
    mark(type: string | MarkType, attrs: ?⁠Object) → Mark
    */
@@ -992,19 +992,19 @@ module Schema: {
     (t, ~type_: [ | `MarkType(PM_Types.markType) | `String(string)], ~attrs: Attrs.t=?, unit) =>
     PM_Types.mark;
 
-  /*
+  /**
    Deserialize a node from its JSON representation. This method is bound.
    nodeFromJSON(json: Object) → Node
    */
   let nodeFromJSON: (t, Js.Json.t) => PM_Types.node;
 
-  /*
+  /**
    Deserialize a mark from its JSON representation. This method is bound.
    markFromJSON(json: Object) → Mark
    */
   let markFromJSON: (t, Js.Json.t) => PM_Types.mark;
 
-  /*
+  /**
    Construct a schema from a schema specification.
    new Schema(spec: SchemaSpec)
    */
@@ -1012,7 +1012,7 @@ module Schema: {
 };
 
 module Node: {
-  /*
+  /**
     This class represents a node in the tree that makes up a ProseMirror document.
     So a document is an instance of Node, with children that are also instances of Node.
     Nodes are persistent data structures. Instead of changing them, you create new ones
@@ -1022,38 +1022,38 @@ module Node: {
    */
   type t = PM_Types.node;
 
-  /*
+  /**
      The type of node that this is.
      type: NodeType
    */
   let type_: t => NodeType.t;
 
-  /*
+  /**
      An object mapping attribute names to values.
      The kind of attributes allowed and required are determined by the node type.
      attrs: Object
    */
   let attrs: t => Attrs.t;
 
-  /*
+  /**
     A container holding the node's children.
     content: Fragment
    */
   let content: t => PM_Types.fragment;
 
-  /*
+  /**
     The marks (things like whether it is emphasized or part of a link) applied to this node.
     marks: [Mark]
    */
   let marks: t => array(Mark.t);
 
-  /*
+  /**
     For text nodes, this contains the node's text content.
     text: ?⁠string
    */
   let text: t => option(string);
 
-  /*
+  /**
    The size of this node, as defined by the integer-based indexing scheme.
    For text nodes, this is the amount of characters. For other leaf nodes,
    it is one. For non-leaf nodes, it is the size of the _content plus two (the start and end token)_.
@@ -1061,33 +1061,33 @@ module Node: {
    */
   let nodeSize: t => int;
 
-  /*
+  /**
    The number of children that the node has.
    childCount: number
    */
   let childCount: t => int;
 
-  /*
+  /**
    Get the child node at the given index.
    Raises an error when the index is out of range.
    child(index: number) → Node
    */
   let childExn: (t, int) => t;
 
-  /*
+  /**
    Get the child node at the given index, if it exists.
    maybeChild(index: number) → ?⁠Node
    */
   let maybeChild: (t, int) => option(t);
 
-  /*
+  /**
    Call `f` for every child node, passing the node,
    its offset into this parent node, and its index.
    forEach(f: fn(node: Node, offset: number, index: number))
    */
   let forEach: (t, ~f: (~node: t, ~offset: int, ~index: int) => unit) => unit;
 
-  /*
+  /**
    Invoke a _callback_ for all descendant nodes recursively
    between the given two positions that are relative to start of this node's content.
    _The callback_ is invoked with the node, its parent-relative position,
@@ -1107,20 +1107,20 @@ module Node: {
     ) =>
     unit;
 
-  /*
+  /**
    Call the given callback for every descendant node.
    Doesn't descend into a node when the callback returns false.
    descendants(f: fn(node: Node, pos: number, parent: Node) → ?⁠bool)
    */
   let descendants: (t, ~f: (~node: t, ~pos: int, ~parent: t) => bool) => unit;
 
-  /*
+  /**
     Concatenates all the text nodes found in this fragment and its children.
     textContent: string
    */
   let textContent: t => string;
 
-  /*
+  /**
     Get all text between positions from and to.
     When blockSeparator is given, it will be inserted whenever a new block node is started.
     When leafText is given, it'll be inserted for every non-text leaf node encountered.
@@ -1129,64 +1129,64 @@ module Node: {
   let textBetween:
     (t, ~from: int, ~to_: int, ~blockSeparator: string=?, ~leafText: string=?, unit) => string;
 
-  /*
+  /**
     Returns this node's first child, if it has children
     firstChild: ?⁠Node
    */
   let firstChild: t => option(t);
 
-  /*
+  /**
    lastChild: ?⁠Node
    Returns this node's last child, if it has children
    */
   let lastChild: t => option(t);
 
-  /*
+  /**
     Test whether two nodes represent the same piece of document.
     eq(other: Node) → bool
    */
   let eq: (t, t) => bool;
 
-  /*
+  /**
     Compare the markup (type, attributes, and marks) of this node to those of another.
     Returns true if both have the same markup.
     sameMarkup(other: Node) → bool
    */
   let sameMarkUp: (t, t) => bool;
 
-  /*
+  /**
      Check whether this node's markup correspond to the given type, attributes, and marks.
      hasMarkup(type: NodeType, attrs: ?⁠Object, marks: ?⁠[Mark]) → bool
    */
   let hasMarkup:
     (t, ~type_: NodeType.t, ~attrs: Attrs.t=?, ~marks: array(Mark.t)=?, unit) => bool;
 
-  /*
+  /**
    Create a new node with the same markup as this node, containing the given content (or empty, if no content is given).
    copy(content: ?⁠Fragment = null) → Node
    */
   let copy: (t, ~content: PM_Types.fragment=?, unit) => t;
 
-  /*
+  /**
    Create a copy of this node, with the given set of marks instead of the node's own marks.
    mark(marks: [Mark]) → Node
     */
   let mark: (t, ~marks: array(Mark.t)) => t;
 
-  /*
+  /**
     Create a copy of this node with only the content between the given positions.
     If to is not given, it defaults to the end of the node.
     cut(from: number, to: ?⁠number) → Node
    */
   let cut: (t, ~from: int, ~to_: int=?, unit) => t;
 
-  /*
+  /**
     Cut out the part of the document between the given positions, and return it as a Slice object.
     slice(from: number, to: ?⁠number = this.content.size) → Slice
    */
   let slice: (t, ~from: int, ~to_: int=?, unit) => Slice.t;
 
-  /*
+  /**
      Replace the part of the document between the given positions with the given slice.
      The slice must 'fit', meaning its open sides must be able to connect to the surrounding
      content, and its content nodes must be valid children for the node they are placed into.
@@ -1195,13 +1195,13 @@ module Node: {
    */
   let replaceExn: (t, ~from: int, ~to_: int, ~slice: Slice.t) => t;
 
-  /*
+  /**
     Find the node directly after the given position.
     nodeAt(pos: number) → ?⁠Node
    */
   let nodeAt: (t, ~pos: int) => option(t);
 
-  /*
+  /**
     Find the (direct) child node after the given offset,
     if any, and return it along with its index and offset relative to this node.
     childAfter(pos: number) → {node: ?⁠Node, index: number, offset: number}
@@ -1215,7 +1215,7 @@ module Node: {
       "offset": int,
     };
 
-  /*
+  /**
     Find the (direct) child node before the given offset,
     if any, and return it along with its index and offset relative to this node.
     childBefore(pos: number) → {node: ?⁠Node, index: number, offset: number}
@@ -1229,54 +1229,54 @@ module Node: {
       "offset": int,
     };
 
-  /*
+  /**
     Resolve the given position in the document, returning
     an object with information about its context.
     resolve(pos: number) → ResolvedPos
    */
   let resolve: (t, ~pos: int) => PM_Types.resolvedPos;
 
-  /*
+  /**
     Test whether a mark of the given type occurs in this document between the two given positions.
     rangeHasMark(from: number, to: number, type: MarkType) → bool
    */
   let rangeHasMark: (t, ~from: int, ~to_: int, ~type_: MarkType.t) => bool;
 
-  /*
+  /**
     True when this is a block (non-inline node)
     isBlock: bool
    */
   let isBlock: t => bool;
 
-  /*
+  /**
     True when this is a textblock node, a block node with inline content.
     isTextblock: bool
    */
   let isTextblock: t => bool;
 
-  /*
+  /**
     True when this node allows inline content.
     inlineContent: bool
    */
   let inLineContent: t => bool;
 
-  /* isInline: bool */
-  /* True when this is an inline node (a text node or a node that can appear among text). */
+  /** isInline: bool */
+  /** True when this is an inline node (a text node or a node that can appear among text). */
   let isInline: t => bool;
 
-  /*
+  /**
     True when this is a text node.
     isText: bool
    */
   let isText: t => bool;
 
-  /*
+  /**
     True when this is a leaf node.
     isLeaf: bool
    */
   let isLeaf: t => bool;
 
-  /*
+  /**
     True when this is an atom, i.e. when it does not have directly editable content.
     This is usually the same as isLeaf, but can be configured with the atom property
     on a node's spec (typically used when the node is displayed as an uneditable node view).
@@ -1284,19 +1284,19 @@ module Node: {
    */
   let isAtom: t => bool;
 
-  /*
+  /**
     Return a string representation of this node for debugging purposes.
     toString() → string
    */
   let toString: t => string;
 
-  /*
+  /**
      Get the content match in this node at the given index.
      contentMatchAt(index: number) → ContentMatch
    */
   let contentMatchAt: (t, ~index: int) => ContentMatch.t;
 
-  /*
+  /**
      Test whether replacing the range between from and to (by child index)
      with the given replacement fragment (which defaults to the empty fragment)
      would leave the node's content valid.
@@ -1315,7 +1315,7 @@ module Node: {
     ) =>
     bool;
 
-  /*
+  /**
     Test whether replacing the range from to to (by index)
     with a node of the given type would leave the node's content valid.
     canReplaceWith(from: number, to: number, type: NodeType, marks: ?⁠[Mark]) → bool
@@ -1323,7 +1323,7 @@ module Node: {
   let canReplaceWith:
     (t, ~from: int, ~to_: int, ~type_: NodeType.t, ~marks: array(Mark.t)=?, unit) => bool;
 
-  /*
+  /**
      Test whether the given node's content could be appended to this node.
      If that node is empty, this will only return true if there is at least
      one node type that can appear in both nodes (to avoid merging completely incompatible nodes).
@@ -1331,20 +1331,20 @@ module Node: {
    */
   let canAppend: (t, ~other: t) => bool;
 
-  /*
+  /**
     Check whether this node and its descendants conform to the schema,
     and raise error when they do not.
     check()
    */
   let checkExn: t => bool;
 
-  /*
+  /**
     Return a JSON-serializeable representation of this node.
     toJSON() → Object
    */
   let toJSON: t => Js.Json.t;
 
-  /*
+  /**
     Deserialize a node from its JSON representation.
     static fromJSON(schema: Schema, json: Object) → Node
    */
@@ -1352,7 +1352,7 @@ module Node: {
 };
 
 module ResolvedPos: {
-  /*
+  /**
     You can resolve a position to get more information about it.
     Objects of this class represent such a resolved position,
     providing various pieces of context information, and some helper methods.
@@ -1361,13 +1361,13 @@ module ResolvedPos: {
    */
   type t = PM_Types.resolvedPos;
 
-  /*
+  /**
    pos: number
    The position that was resolved.
    */
   let pos: t => int;
 
-  /*
+  /**
    The number of levels the parent node is from the root.
    If this position points directly into the root node, it is 0.
    If it points into a top-level paragraph, 1, and so on.
@@ -1375,13 +1375,13 @@ module ResolvedPos: {
    */
   let depth: t => int;
 
-  /*
+  /**
    The offset this position has into its parent node.
    parentOffset: number
    */
   let parentOffset: t => int;
 
-  /*
+  /**
    The parent node that the position points into.
    Note that even if a position points into a text node, that node is not considered
    the parent—text nodes are ‘flat’ in this model, and have no content.
@@ -1389,19 +1389,19 @@ module ResolvedPos: {
    */
   let parent: t => PM_Types.node;
 
-  /*
+  /**
    The root node in which the position was resolved.
    doc: Node
    */
   let doc: t => PM_Types.node;
 
-  /*
+  /**
    The ancestor node at the given level. p.node(p.depth) is the same as p.parent.
    node(depth: ?⁠number) → Node
    */
   let node: (t, ~depth: int=?, unit) => PM_Types.node;
 
-  /*
+  /**
    The index into the ancestor at the given level.
    If this points at the 3rd node in the 2nd paragraph on the top level,
    for example, p.index(0) is 2 and p.index(1) is 3.
@@ -1409,39 +1409,39 @@ module ResolvedPos: {
    */
   let index: (t, ~depth: int=?, unit) => int;
 
-  /*
+  /**
    The index pointing after this position into the ancestor at the given level.
    indexAfter(depth: ?⁠number) → number
    */
   let indexAfter: (t, ~depth: int=?, unit) => int;
 
-  /*
+  /**
    The (absolute) position at the start of the node at the given level.
    start(depth: ?⁠number) → number
    */
   let start: (t, ~depth: int=?, unit) => int;
 
-  /*
+  /**
    The (absolute) position at the end of the node at the given level.
    end(depth: ?⁠number) → number
    */
   let end_: (t, ~depth: int=?, unit) => int;
 
-  /*
+  /**
    The (absolute) position directly before the wrapping node at the given level,
    or, when level is this.depth + 1, the original position.
    before(depth: ?⁠number) → number
    */
   let before: (t, ~depth: int=?, unit) => int;
 
-  /*
+  /**
    The (absolute) position directly after the wrapping node at the given level,
    or the original position when level is this.depth + 1.
    after(depth: ?⁠number) → number
    */
   let after: (t, ~depth: int=?, unit) => int;
 
-  /*
+  /**
    When this position points into a text node,
    this returns the distance between the position and the start of the text node.
    Will be zero for positions that point between nodes.
@@ -1449,7 +1449,7 @@ module ResolvedPos: {
    */
   let textOffset: t => int;
 
-  /*
+  /**
    Get the node directly after the position, if any.
    If the position points into a text node,
    only the part of that node after the position is returned.
@@ -1457,7 +1457,7 @@ module ResolvedPos: {
    */
   let nodeAfter: t => option(PM_Types.node);
 
-  /*
+  /**
    Get the node directly before the position, if any.
    If the position points into a text node,
    only the part of that node before the position is returned.
@@ -1465,7 +1465,7 @@ module ResolvedPos: {
    */
   let nodeBefore: t => option(PM_Types.node);
 
-  /*
+  /**
    Get the marks at this position, factoring in the surrounding marks' inclusive property.
    If the position is at the start of a non-empty node,
    the marks of the node after it (if any) are returned.
@@ -1473,7 +1473,7 @@ module ResolvedPos: {
    */
   let marks: t => array(PM_Types.mark);
 
-  /*
+  /**
    Get the marks after the current position, if any,
    except those that are non-inclusive and not present at position $end.
    This is mostly useful for getting the set of marks to preserve after a deletion.
@@ -1483,14 +1483,14 @@ module ResolvedPos: {
    */
   let marksAcross: (t, ~resolvedEnd: t) => option(array(PM_Types.mark));
 
-  /*
+  /**
    The depth up to which this position
    and the given (non-resolved) position share the same parent nodes.
    sharedDepth(pos: number) → number
    */
   let sharedDepth: (t, ~pos: int) => int;
 
-  /*
+  /**
    Returns a range based on the place where this position
    and the given position diverge around block content. If both point into the same textblock, for example, a range around that textblock will be returned. If they point into different blocks, the range around those blocks in their shared ancestor is returned. You can pass in an optional predicate that will be called with a parent node to see if a range into that parent is acceptable.
    blockRange(other: ?⁠ResolvedPos = this, pred: ?⁠fn(Node) → bool) → ?⁠NodeRange
@@ -1498,19 +1498,19 @@ module ResolvedPos: {
   let blockRange:
     (t, ~other: t=?, ~pred: PM_Types.node => bool=?, unit) => option(PM_Types.nodeRange);
 
-  /*
+  /**
    Query whether the given position shares the same parent node.
    sameParent(other: ResolvedPos) → bool
    */
   let sameParent: (t, ~other: t) => bool;
 
-  /*
+  /**
    Return the greater of this and the given position.
    max(other: ResolvedPos) → ResolvedPos
    */
   let max: (t, ~other: t) => t;
 
-  /*
+  /**
    Return the smaller of this and the given position.
    min(other: ResolvedPos) → ResolvedPos
    */
@@ -1518,7 +1518,7 @@ module ResolvedPos: {
 };
 
 module Fragment: {
-  /*
+  /**
     A fragment represents a node's collection of child nodes.
     Like nodes, fragments are persistent data structures,
     and you should not mutate them or their content.
@@ -1526,13 +1526,13 @@ module Fragment: {
     The API tries to make this easy.
    */
   type t = PM_Types.fragment;
-  /*
+  /**
     The size of the fragment, which is the total of the size of its content nodes.
     size: number
    */
   let size: t => int;
 
-  /*
+  /**
    Invoke a callback for all descendant nodes between the given two positions
    (relative to start of this fragment).
    Doesn't descend into a node when the callback returns false.
@@ -1549,81 +1549,81 @@ module Fragment: {
     ) =>
     unit;
 
-  /*
+  /**
    Call the given callback for every descendant node.
    The callback may return false to prevent traversal of a given node's children.
    descendants(f: fn(node: Node, pos: number, parent: Node) → ?⁠bool)
    */
   let descendants: (t, ~f: (~node: Node.t, ~pos: int, ~parent: Node.t) => bool) => unit;
 
-  /*
+  /**
    Create a new fragment containing the combined content of this fragment and the other.
    append(other: Fragment) → Fragment
    */
   let append: (t, ~other: t) => t;
 
-  /*
+  /**
    Cut out the sub-fragment between the two given positions.
    cut(from: number, to: ?⁠number) → Fragment
    */
   let cut: (t, ~from: int, ~to_: int=?, unit) => t;
 
-  /*
+  /**
    Create a new fragment in which the node at the given index is replaced by the given node.
    replaceChild(index: number, node: Node) → Fragment
    */
   let replaceChild: (t, ~index: int, ~node: Node.t) => t;
 
-  /*
+  /**
    Compare this fragment to another one.
    eq(other: Fragment) → bool
    */
   let eq: (t, t) => bool;
 
-  /*
+  /**
    The first child of the fragment, or null if it is empty.
    firstChild: ?⁠Node
    */
   let firstChild: t => option(Node.t);
 
-  /*
+  /**
    The last child of the fragment, or null if it is empty.
    lastChild: ?⁠Node
    */
   let lastChild: t => option(Node.t);
 
-  /*
+  /**
    The number of child nodes in this fragment.
    childCount: number
    */
   let childCount: t => int;
 
-  /*
+  /**
    Get the child node at the given index. Raise an error when the index is out of range.
    child(index: number) → Node
    */
   let childExn: (t, int) => Node.t;
 
-  /*
+  /**
    Get the child node at the given index, if it exists.
    maybeChild(index: number) → ?⁠Node
    */
   let maybeChild: (t, int) => option(Node.t);
 
-  /*
+  /**
    Call f for every child node, passing the node, its offset into this parent node, and its index.
    forEach(f: fn(node: Node, offset: number, index: number))
    */
   let forEach: (t, ~f: (~node: Node.t, ~offset: int, ~index: int) => unit) => unit;
 
-  /*
+  /**
    Find the first position at which this fragment and another fragment differ,
    or null if they are the same.
    findDiffStart(other: Fragment) → ?⁠number
    */
   let findDiffStart: (t, ~other: t) => option(int);
 
-  /*
+  /**
    Find the first position, searching from the end,
    at which this fragment and the given fragment differ,
    or null if they are the same. Since this position will not be the same in both nodes,
@@ -1638,32 +1638,32 @@ module Fragment: {
       "b": int,
     });
 
-  /*
+  /**
    Return a debugging string that describes this fragment.
    toString() → string
    */
   let toString: t => string;
 
-  /*
+  /**
    Create a JSON-serializeable representation of this fragment.
    toJSON() → ?⁠Object
    */
   let toJSON: t => Js.Json.t;
 
-  /*
+  /**
    Deserialize a fragment from its JSON representation.
    static fromJSON(schema: Schema, value: ?⁠Object) → Fragment
    */
   let fromJSON: (Schema.t, Js.Json.t) => t;
 
-  /*
+  /**
    Build a fragment from an array of nodes.
    Ensures that adjacent text nodes with the same marks are joined together.
    static fromArray(array: [Node]) → Fragment
    */
   let fromArray: array(Node.t) => t;
 
-  /*
+  /**
    Create a fragment from something that can be interpreted as a set of nodes.
    For null, it returns the empty fragment. For a fragment, the fragment itself.
    For a node or array of nodes, a fragment containing those nodes.
@@ -1671,7 +1671,7 @@ module Fragment: {
    */
   let fromNode: Node.t => t;
 
-  /*
+  /**
    An empty fragment. Intended to be reused whenever a node doesn't contain anything
    (rather than allocating a new empty fragment for each leaf node).
    static empty: Fragment
@@ -1680,7 +1680,7 @@ module Fragment: {
 };
 
 module ParseOptions: {
-  /*
+  /**
    These are the options recognized by the parse and parseSlice methods.
 
    preserveWhitespace: ?⁠bool | "full"
@@ -1725,43 +1725,43 @@ module ParseOptions: {
 };
 
 module DOMParser: {
-  /*
+  /**
 
    A DOM parser represents a strategy for parsing DOM content into a ProseMirror document conforming to a given schema. Its behavior is defined by an array of rules.
       */
   type t;
 
-  /*
+  /**
     Create a parser that targets the given schema, using the given parsing rules.
     new DOMParser(schema: Schema, rules: [ParseRule])
    */
   let make: (~schema: Schema.t, ~rules: array(ParseRule.t)) => t;
 
-  /*
+  /**
    The schema into which the parser parses.
    schema: Schema
       */
   let schema: t => Schema.t;
 
-  /*
+  /**
    The set of parse rules that the parser uses, in order of precedence.
    rules: [ParseRule]
       */
   let rules: t => array(ParseRule.t);
 
-  /*
+  /**
    Parse a document from the content of a DOM node.
    parse(dom: dom.Node, options: ?⁠ParseOptions = {}) → Node
       */
   let parse: (t, ~dom: Dom.node, ~options: ParseOptions.t=?, unit) => Node.t;
 
-  /*
+  /**
    Parses the content of the given DOM node, like parse, and takes the same set of options. But unlike that method, which produces a whole node, this one returns a slice that is open at the sides, meaning that the schema constraints aren't applied to the start of nodes to the left of the input and the end of nodes at the end.
    parseSlice(dom: dom.Node, options: ?⁠ParseOptions = {}) → Slice
       */
   let parseSlice: (t, ~dom: Dom.node, ~options: ParseOptions.t=?, unit) => Slice.t;
 
-  /*
+  /**
    Construct a DOM parser using the parsing rules listed in a schema's node specs, reordered by priority.
    static fromSchema(schema: Schema) → DOMParser
       */

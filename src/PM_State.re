@@ -439,6 +439,7 @@ module Transaction = {
   external insertText: (t, ~text: string, ~from: int=?, ~to_: int=?, unit) => t = "insertText";
   [@bs.get] external isGeneric: t => bool = "isGeneric";
   [@bs.send] external scrollIntoView: t => t = "scrollIntoView";
+  [@bs.get] external scrolledIntoView: t => bool = "scrolledIntoView";
 
   module Meta = {
     module type T = {

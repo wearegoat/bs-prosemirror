@@ -603,7 +603,7 @@ module Node = {
   external rangeHasMark: (t, ~from: int, ~to_: int, ~type_: MarkType.t) => bool = "rangeHasMark";
   [@bs.get] external isBlock: t => bool = "isBlock";
   [@bs.get] external isTextblock: t => bool = "isTextblock";
-  [@bs.get] external inLineContent: t => bool = "inLineContent";
+  [@bs.get] external inlineContent: t => bool = "inlineContent";
   [@bs.get] external isInline: t => bool = "isInline";
   [@bs.get] external isText: t => bool = "isText";
   [@bs.get] external isLeaf: t => bool = "isLeaf";

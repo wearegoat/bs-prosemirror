@@ -1258,7 +1258,7 @@ module Node: {
     True when this node allows inline content.
     inlineContent: bool
    */
-  let inLineContent: t => bool;
+  let inlineContent: t => bool;
 
   /** isInline: bool */
   /** True when this is an inline node (a text node or a node that can appear among text). */

@@ -241,7 +241,7 @@ module ContentMatch = {
   [@bs.get] external edgeCount: t => int = "edgeCount";
   [@bs.send]
   external edge:
-    t =>
+    (t, ~n:int) =>
     {
       .
       "_type": Types.nodeType,

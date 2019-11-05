@@ -420,7 +420,7 @@ module ContentMatch: {
    edge(n: number) → {type: NodeType, next: ContentMatch}
    */
   let edge:
-    t =>
+    (t, ~n:int) =>
     {
       .
       "_type": PM_Types.nodeType,

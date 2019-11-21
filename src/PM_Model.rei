@@ -17,6 +17,13 @@ module AttributeSpec: {
   let make: (~default: 'a=?, unit) => t;
 };
 
+module DOMAttrs: {
+  type t;
+  let make: Js.Dict.t(string) => t;
+  let toDict: t => Js.Dict.t(string);
+  let empty: unit => t;
+};
+
 module DOMOutputSpec: {
   /**
     A description of a DOM structure. Can be either a string, which is interpreted as a text node,
@@ -30,8 +37,8 @@ module DOMOutputSpec: {
     in its parent node.
    */
   type spec =
-    | LeafNode(string, Attrs.t): spec
-    | Node(string, Attrs.t, spec): spec
+    | LeafNode(string, DOMAttrs.t): spec
+    | Node(string, DOMAttrs.t, spec): spec
     | Text(string): spec
     | Hole: spec;
 

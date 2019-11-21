@@ -11,10 +11,17 @@ module AttributeSpec = {
   [@bs.obj] external make: (~default: 'a=?, unit) => t = "";
 };
 
+module DOMAttrs = {
+  type t = Js.Dict.t(string);
+  let make: Js.Dict.t(string) => t = a => a;
+  let toDict: t => Js.Dict.t(string) = a => a;
+  let empty: unit => t = Js.Dict.empty;
+};
+
 module DOMOutputSpec = {
   type spec =
-    | LeafNode(string, Attrs.t): spec
-    | Node(string, Attrs.t, spec): spec
+    | LeafNode(string, DOMAttrs.t): spec
+    | Node(string, DOMAttrs.t, spec): spec
     | Text(string): spec
     | Hole: spec;
   type t;

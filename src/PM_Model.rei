@@ -910,14 +910,14 @@ module SchemaSpec: {
      precedence by default, and which nodes come first in a given group.
      nodes: Object<NodeSpec> | OrderedMap<NodeSpec>
    */
-  let nodesGet: t => OrderedMap.t(NodeSpec.t);
+  let nodes: t => OrderedMap.t(NodeSpec.t);
 
   /**
      The mark types that exist in this schema. The order in which they are provided determines the
      order in which mark sets are sorted and in which parse rules are tried.
      marks: ?⁠Object<MarkSpec> | OrderedMap<MarkSpec>
    */
-  let marksGet: t => OrderedMap.t(MarkSpec.t);
+  let marks: t => OrderedMap.t(MarkSpec.t);
 
   /**
      The name of the default top-level node for the schema. Defaults to "doc".

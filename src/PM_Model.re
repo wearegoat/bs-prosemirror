@@ -490,7 +490,7 @@ module MarkType = {
 };
 
 module SchemaSpec = {
-  [@bs.deriving abstract]
+  [@bs.deriving {abstract: light}]
   type t = {
     nodes: OrderedMap.t(NodeSpec.t),
     marks: OrderedMap.t(MarkSpec.t),

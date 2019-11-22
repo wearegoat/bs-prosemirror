@@ -3,7 +3,7 @@ module Attrs = {
   type t;
   let make: Js.t({..}) => t = a => Obj.magic(a);
   let toJs: t => Js.t({..}) = a => Obj.magic(a);
-  let empty = make(Js.Obj.empty());
+  let empty: unit => t = () => make(Js.Obj.empty());
 };
 
 module AttributeSpec = {

@@ -2,7 +2,7 @@ module Attrs: {
   type t;
   let make: Js.t({..}) => t;
   let toJs: t => Js.t({..});
-  let empty: t;
+  let empty: unit => t;
 };
 
 module AttributeSpec: {

@@ -3,7 +3,7 @@ module Attrs = {
   type t;
   let make: Js.t({..}) => t = a => Obj.magic(a);
   let toJs: t => Js.t({..}) = a => Obj.magic(a);
-  let empty = make(Js.Obj.empty());
+  let empty: unit => t = () => make(Js.Obj.empty());
 };
 
 module AttributeSpec = {
@@ -11,10 +11,17 @@ module AttributeSpec = {
   [@bs.obj] external make: (~default: 'a=?, unit) => t = "";
 };
 
+module DOMAttrs = {
+  type t = Js.Dict.t(string);
+  let make: Js.Dict.t(string) => t = a => a;
+  let toDict: t => Js.Dict.t(string) = a => a;
+  let empty: unit => t = Js.Dict.empty;
+};
+
 module DOMOutputSpec = {
   type spec =
-    | LeafNode(string, Attrs.t): spec
-    | Node(string, Attrs.t, spec): spec
+    | LeafNode(string, DOMAttrs.t): spec
+    | Node(string, DOMAttrs.t, spec): spec
     | Text(string): spec
     | Hole: spec;
   type t;
@@ -483,7 +490,7 @@ module MarkType = {
 };
 
 module SchemaSpec = {
-  [@bs.deriving abstract]
+  [@bs.deriving {abstract: light}]
   type t = {
     nodes: OrderedMap.t(NodeSpec.t),
     marks: OrderedMap.t(MarkSpec.t),

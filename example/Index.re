@@ -21,14 +21,14 @@ let config =
             "Mod-b",
             PM.Commands.toggleMark(
               ~markType=schema->Model.Schema.marks->Js.Dict.get("strong")->Option.getExn,
-              ~attrs=Model.Attrs.empty,
+              ~attrs=Model.Attrs.empty(),
             ),
           ),
           (
             "Mod-i",
             PM.Commands.toggleMark(
               ~markType=schema->Model.Schema.marks->Js.Dict.get("em")->Option.getExn,
-              ~attrs=Model.Attrs.empty,
+              ~attrs=Model.Attrs.empty(),
             ),
           ),
         ]

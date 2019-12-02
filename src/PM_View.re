@@ -76,76 +76,74 @@ module DirectEditorProps = {
     NodeView.t;
   type pasteHandler =
     (~view: Types.editorView, ~event: Dom.event, ~slice: PM_Model.Slice.t) => bool;
-  [@bs.deriving abstract]
-  type t = {
-    [@bs.optional]
-    handleDOMEvents: Js.Dict.t(domEventHandler),
-    [@bs.optional]
-    handleKeyDown: keyboardEventHandler,
-    [@bs.optional]
-    handleKeyPress: keyboardEventHandler,
-    [@bs.optional]
-    handleTextInput: (~view: Types.editorView, ~from: int, ~to_: int, ~text: string) => bool,
-    [@bs.optional]
-    handleClickOn: mouseEventOnHandler,
-    [@bs.optional]
-    handleClick: mouseEventHandler,
-    [@bs.optional]
-    handleDoubleClickOn: mouseEventOnHandler,
-    [@bs.optional]
-    handleDoubleClick: mouseEventHandler,
-    [@bs.optional]
-    handleTripleClickOn: mouseEventOnHandler,
-    [@bs.optional]
-    handleTripleClick: mouseEventHandler,
-    [@bs.optional]
-    handlePaste: pasteHandler,
-    [@bs.optional]
-    handleDrop: dropHandler,
-    [@bs.optional]
-    handleScrollToSelection: Types.editorView => bool,
-    [@bs.optional]
-    createSelectionBetween,
-    /* TODO: */
-    [@bs.optional]
-    domParser: PM_Model.DOMParser.t,
-    [@bs.optional]
-    transformPastedHTML: (~html: string) => string,
-    /* TODO: */
-    [@bs.optional]
-    clipboardParser: PM_Model.DOMParser.t,
-    [@bs.optional]
-    transformPastedText: (~text: string) => string,
-    [@bs.optional]
-    clipboardTextParser: (~text: string, ~context: PM_Model.ResolvedPos.t) => PM_Model.Slice.t,
-    [@bs.optional]
-    transformPasted: PM_Model.Slice.t => PM_Model.Slice.t,
-    [@bs.optional]
-    nodeViews: Js.Dict.t(nodeViewInit),
-    [@bs.optional]
-    clipboardSerializer: PM_Model.DOMSerializer.t,
-    [@bs.optional]
-    clipboardTextSerializer: PM_Model.Slice.t => string,
-    [@bs.optional]
-    decorations: PM_State.EditorState.t => DecorationSet.t,
-    [@bs.optional]
-    editable: PM_State.EditorState.t => bool,
-    [@bs.optional]
-    attributes: PM_Model.Attrs.t,
-    [@bs.optional] [@bs.as "attributes"]
-    attributesFn: PM_State.EditorState.t => Js.Nullable.t(PM_Model.Attrs.t),
-    [@bs.optional]
-    scrollThreshold: int,
-    [@bs.optional] [@bs.as "scrollThreshold"]
-    scrollThresholdObj: pos,
-    [@bs.optional]
-    scrollMargin: int,
-    [@bs.optional] [@bs.as "scrollMarginObj"]
-    scrollMarginObj: pos,
-    state: PM_State.EditorState.t,
-    [@bs.optional]
-    dispatchTransaction: [@bs.this] ((Types.editorView, PM_State.Transaction.t) => unit),
+  module Attributes = PM_EditorProps.Attributes;
+  module ScrollThreshold = PM_EditorProps.ScrollThreshold;
+  module ScrollMargin = PM_EditorProps.ScrollMargin;
+  module Ext = {
+    [@bs.deriving abstract]
+    type t = {
+      [@bs.optional]
+      handleDOMEvents: Js.Dict.t(domEventHandler),
+      [@bs.optional]
+      handleKeyDown: keyboardEventHandler,
+      [@bs.optional]
+      handleKeyPress: keyboardEventHandler,
+      [@bs.optional]
+      handleTextInput: (~view: Types.editorView, ~from: int, ~to_: int, ~text: string) => bool,
+      [@bs.optional]
+      handleClickOn: mouseEventOnHandler,
+      [@bs.optional]
+      handleClick: mouseEventHandler,
+      [@bs.optional]
+      handleDoubleClickOn: mouseEventOnHandler,
+      [@bs.optional]
+      handleDoubleClick: mouseEventHandler,
+      [@bs.optional]
+      handleTripleClickOn: mouseEventOnHandler,
+      [@bs.optional]
+      handleTripleClick: mouseEventHandler,
+      [@bs.optional]
+      handlePaste: pasteHandler,
+      [@bs.optional]
+      handleDrop: dropHandler,
+      [@bs.optional]
+      handleScrollToSelection: Types.editorView => bool,
+      [@bs.optional]
+      createSelectionBetween,
+      [@bs.optional]
+      domParser: PM_Model.DOMParser.t,
+      [@bs.optional]
+      transformPastedHTML: (~html: string) => string,
+      [@bs.optional]
+      clipboardParser: PM_Model.DOMParser.t,
+      [@bs.optional]
+      transformPastedText: (~text: string) => string,
+      [@bs.optional]
+      clipboardTextParser: (~text: string, ~context: PM_Model.ResolvedPos.t) => PM_Model.Slice.t,
+      [@bs.optional]
+      transformPasted: PM_Model.Slice.t => PM_Model.Slice.t,
+      [@bs.optional]
+      nodeViews: Js.Dict.t(nodeViewInit),
+      [@bs.optional]
+      clipboardSerializer: PM_Model.DOMSerializer.t,
+      [@bs.optional]
+      clipboardTextSerializer: PM_Model.Slice.t => string,
+      [@bs.optional]
+      decorations: PM_State.EditorState.t => DecorationSet.t,
+      [@bs.optional]
+      editable: PM_State.EditorState.t => bool,
+      [@bs.optional]
+      attributes: Attributes.js,
+      [@bs.optional]
+      scrollThreshold: ScrollThreshold.js,
+      [@bs.optional]
+      scrollMargin: ScrollMargin.js,
+      state: PM_State.EditorState.t,
+      [@bs.optional]
+      dispatchTransaction: [@bs.this] ((Types.editorView, PM_State.Transaction.t) => unit),
+    };
   };
+  type t = Ext.t;
   let make =
       (
         ~state: PM_State.EditorState.t,
@@ -176,12 +174,9 @@ module DirectEditorProps = {
         ~clipboardTextSerializer: option(PM_Model.Slice.t => string)=?,
         ~decorations: option(PM_State.EditorState.t => DecorationSet.t)=?,
         ~editable: option(PM_State.EditorState.t => bool)=?,
-        ~attributes: option(PM_Model.Attrs.t)=?,
-        ~attributesFn: option(PM_State.EditorState.t => Js.Nullable.t(PM_Model.Attrs.t))=?,
-        ~scrollThreshold: option(int)=?,
-        ~scrollThresholdObj: option(pos)=?,
-        ~scrollMargin: option(int)=?,
-        ~scrollMarginObj: option(pos)=?,
+        ~attributes: option(Attributes.t)=?,
+        ~scrollThreshold: option(ScrollThreshold.t)=?,
+        ~scrollMargin: option(ScrollMargin.t)=?,
         ~dispatchTransaction: option((Types.editorView, PM_State.Transaction.t) => unit)=?,
         (),
       ) => {
@@ -190,7 +185,8 @@ module DirectEditorProps = {
       | Some(fn) => Some([@bs.this] (a, b) => fn(a, b))
       | None => None
       };
-    t(
+    open Belt;
+    Ext.t(
       ~handleDOMEvents?,
       ~handleKeyDown?,
       ~handleKeyPress?,
@@ -216,12 +212,9 @@ module DirectEditorProps = {
       ~clipboardTextSerializer?,
       ~decorations?,
       ~editable?,
-      ~attributes?,
-      ~attributesFn?,
-      ~scrollThreshold?,
-      ~scrollThresholdObj?,
-      ~scrollMargin?,
-      ~scrollMarginObj?,
+      ~attributes=?attributes->Option.map(Attributes.toJs),
+      ~scrollThreshold=?scrollThreshold->Option.map(ScrollThreshold.toJs),
+      ~scrollMargin=?scrollMargin->Option.map(ScrollMargin.toJs),
       ~state,
       ~dispatchTransaction?,
       (),

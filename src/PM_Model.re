@@ -94,6 +94,37 @@ module ParseRule = {
         };
       };
   };
+  module GetAttrs = {
+    type t =
+      | FromNode(Dom.node => GetAttrsResult.t)
+      | FromString(string => GetAttrsResult.t);
+    type js;
+    let fnResultToJs = fn => x => GetAttrsResult.toJs(fn(x));
+    let toJs: t => js =
+      fun
+      | FromNode(fn) => Obj.magic(fn->fnResultToJs)
+      | FromString(fn) => Obj.magic(fn->fnResultToJs);
+  };
+  module ContentElement = {
+    type t =
+      | FromNode(Dom.node => Dom.node)
+      | FromString(string);
+    type js;
+    let toJs: t => js =
+      fun
+      | FromNode(fn) => Obj.magic(fn)
+      | FromString(s) => Obj.magic(s);
+  };
+  module PreserveWhitespace = {
+    type t =
+      | Bool(bool)
+      | Full;
+    type js;
+    let toJs: t => js =
+      fun
+      | Bool(b) => Obj.magic(b)
+      | Full => Obj.magic("full");
+  };
 
   module Ext = {
     [@bs.deriving abstract]
@@ -118,21 +149,14 @@ module ParseRule = {
       skip: bool,
       [@bs.optional]
       attrs: Attrs.t,
-      [@bs.optional] [@bs.as "getAttrs"]
-      getAttrsWithNode: Dom.node => GetAttrsResult.js,
-      [@bs.optional] [@bs.as "getAttrs"]
-      getAttrsWithString: string => GetAttrsResult.js,
-      [@bs.optional] [@bs.as "contentElement"]
-      contentElementWithNode: Dom.node => Dom.node,
-      [@bs.optional] [@bs.as "contentElement"]
-      contentElementWithString: string => Dom.node,
+      [@bs.optional]
+      getAttrs: GetAttrs.js,
+      [@bs.optional]
+      contentElement: ContentElement.js,
       [@bs.optional]
       getContent: (Dom.node, Types.schema) => Types.fragment,
-      // Only possible value is "full"
-      [@bs.optional] [@bs.as "preserveWhitespace"]
-      preserveWhitespaceFull: string,
       [@bs.optional]
-      preserveWhitespace: bool,
+      preserveWhitespace: PreserveWhitespace.js,
     };
   };
 
@@ -150,16 +174,13 @@ module ParseRule = {
         ~ignore: option(bool)=?,
         ~skip: option(bool)=?,
         ~attrs: option(Attrs.t)=?,
-        ~getAttrsWithNode: option(Dom.node => GetAttrsResult.t)=?,
-        ~getAttrsWithString: option(string => GetAttrsResult.t)=?,
-        ~contentElementWithNode: option(Dom.node => Dom.node)=?,
-        ~contentElementWithString: option(string => Dom.node)=?,
+        ~getAttrs: option(GetAttrs.t)=?,
+        ~contentElement: option(ContentElement.t)=?,
         ~getContent: option((Dom.node, Types.schema) => Types.fragment)=?,
-        ~preserveWhitespaceFull: option(string)=?,
-        ~preserveWhitespace: option(bool)=?,
+        ~preserveWhitespace: option(PreserveWhitespace.t)=?,
         (),
       ) => {
-    let fnResultToJs = fnO => fnO->Belt.Option.map((fn, x) => GetAttrsResult.toJs(fn(x)));
+    open Belt;
     Ext.t(
       ~tag?,
       ~namespace?,
@@ -171,13 +192,11 @@ module ParseRule = {
       ~ignore?,
       ~skip?,
       ~attrs?,
-      ~getAttrsWithNode=?getAttrsWithNode |> fnResultToJs,
-      ~getAttrsWithString=?getAttrsWithString |> fnResultToJs,
-      ~contentElementWithNode?,
-      ~contentElementWithString?,
+      ~getAttrs=?getAttrs->Option.map(GetAttrs.toJs),
+      ~contentElement=?contentElement->Option.map(ContentElement.toJs),
       ~getContent?,
-      ~preserveWhitespaceFull?,
-      ~preserveWhitespace?,
+      ~preserveWhitespace=?
+        preserveWhitespace->Option.map(PreserveWhitespace.toJs),
       (),
     );
   };
@@ -721,29 +740,57 @@ module Fragment = {
 };
 
 module ParseOptions = {
-  [@bs.deriving abstract]
-  type t = {
-    // Only possible value is "full"
-    [@bs.optional] [@bs.as "preserveWhitespace"]
-    preserveWhitespaceFull: string,
-    [@bs.optional]
-    preserveWhitespace: bool,
-    [@bs.optional]
-    findPositions:
-      array({
-        .
-        "node": Dom.node,
-        "offset": int,
-      }),
-    [@bs.optional]
-    from: int,
-    [@bs.optional] [@bs.as "to"]
-    to_: int,
-    [@bs.optional]
-    topNode: ContentMatch.t,
-    [@bs.optional]
-    context: Types.resolvedPos,
+  module PreserveWhitespace = ParseRule.PreserveWhitespace;
+  module Ext = {
+    [@bs.deriving abstract]
+    type t = {
+      [@bs.optional]
+      preserveWhitespace: PreserveWhitespace.js,
+      [@bs.optional]
+      findPositions:
+        array({
+          .
+          "node": Dom.node,
+          "offset": int,
+        }),
+      [@bs.optional]
+      from: int,
+      [@bs.optional] [@bs.as "to"]
+      to_: int,
+      [@bs.optional]
+      topNode: ContentMatch.t,
+      [@bs.optional]
+      context: Types.resolvedPos,
+    };
   };
+  type t = Ext.t;
+  let t =
+      (
+        ~preserveWhitespace: option(PreserveWhitespace.t)=?,
+        ~findPositions:
+           option(
+             array({
+               .
+               "node": Dom.node,
+               "offset": int,
+             }),
+           )=?,
+        ~from: option(int)=?,
+        ~to_: option(int)=?,
+        ~topNode: option(ContentMatch.t)=?,
+        ~context: option(Types.resolvedPos)=?,
+        (),
+      ): t =>
+    Ext.t(
+      ~preserveWhitespace=?
+        preserveWhitespace->Belt.Option.map(PreserveWhitespace.toJs),
+      ~findPositions?,
+      ~from?,
+      ~to_?,
+      ~topNode?,
+      ~context?,
+      (),
+    ); 
 };
 
 module DOMParser = {

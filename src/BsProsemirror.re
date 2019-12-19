@@ -7,3 +7,4 @@ module Command = PM_Command;
 module Commands = PM_Commands;
 module SchemaBasic = PM_SchemaBasic;
 module SchemaList = PM_SchemaList;
+module ChangeSet = PM_ChangeSet;

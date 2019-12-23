@@ -76,6 +76,20 @@ module DirectEditorProps = {
     NodeView.t;
   type pasteHandler =
     (~view: Types.editorView, ~event: Dom.event, ~slice: PM_Model.Slice.t) => bool;
+  module Attributes = PM_EditorProps.Attributes;
+  module ScrollThreshold = PM_EditorProps.ScrollThreshold;
+  module ScrollMargin = PM_EditorProps.ScrollMargin;
+  module type DispatchTransaction = {
+    type t;
+    let make: ((Types.editorView, PM_State.Transaction.t) => unit) => t;
+  };
+  module DispatchTransaction: DispatchTransaction = {
+    [@unboxed]
+    type t = 
+      | Any([@bs.this]((Types.editorView, PM_State.Transaction.t) => unit)): t;
+    let make: ((Types.editorView, PM_State.Transaction.t) => unit) => t =
+      fn => Any([@bs.this] (a, b) => fn(a, b));
+  };
   [@bs.deriving abstract]
   type t = {
     [@bs.optional]
@@ -106,12 +120,10 @@ module DirectEditorProps = {
     handleScrollToSelection: Types.editorView => bool,
     [@bs.optional]
     createSelectionBetween,
-    /* TODO: */
     [@bs.optional]
     domParser: PM_Model.DOMParser.t,
     [@bs.optional]
     transformPastedHTML: (~html: string) => string,
-    /* TODO: */
     [@bs.optional]
     clipboardParser: PM_Model.DOMParser.t,
     [@bs.optional]
@@ -131,20 +143,14 @@ module DirectEditorProps = {
     [@bs.optional]
     editable: PM_State.EditorState.t => bool,
     [@bs.optional]
-    attributes: PM_Model.Attrs.t,
-    [@bs.optional] [@bs.as "attributes"]
-    attributesFn: PM_State.EditorState.t => Js.Nullable.t(PM_Model.Attrs.t),
+    attributes: Attributes.t,
     [@bs.optional]
-    scrollThreshold: int,
-    [@bs.optional] [@bs.as "scrollThreshold"]
-    scrollThresholdObj: pos,
+    scrollThreshold: ScrollThreshold.t,
     [@bs.optional]
-    scrollMargin: int,
-    [@bs.optional] [@bs.as "scrollMarginObj"]
-    scrollMarginObj: pos,
+    scrollMargin: ScrollMargin.t,
     state: PM_State.EditorState.t,
     [@bs.optional]
-    dispatchTransaction: [@bs.this] ((Types.editorView, PM_State.Transaction.t) => unit),
+    dispatchTransaction: DispatchTransaction.t,
   };
   let make =
       (
@@ -176,20 +182,12 @@ module DirectEditorProps = {
         ~clipboardTextSerializer: option(PM_Model.Slice.t => string)=?,
         ~decorations: option(PM_State.EditorState.t => DecorationSet.t)=?,
         ~editable: option(PM_State.EditorState.t => bool)=?,
-        ~attributes: option(PM_Model.Attrs.t)=?,
-        ~attributesFn: option(PM_State.EditorState.t => Js.Nullable.t(PM_Model.Attrs.t))=?,
-        ~scrollThreshold: option(int)=?,
-        ~scrollThresholdObj: option(pos)=?,
-        ~scrollMargin: option(int)=?,
-        ~scrollMarginObj: option(pos)=?,
+        ~attributes: option(Attributes.t)=?,
+        ~scrollThreshold: option(ScrollThreshold.t)=?,
+        ~scrollMargin: option(ScrollMargin.t)=?,
         ~dispatchTransaction: option((Types.editorView, PM_State.Transaction.t) => unit)=?,
         (),
-      ) => {
-    let dispatchTransaction =
-      switch (dispatchTransaction) {
-      | Some(fn) => Some([@bs.this] (a, b) => fn(a, b))
-      | None => None
-      };
+      ) => 
     t(
       ~handleDOMEvents?,
       ~handleKeyDown?,
@@ -217,16 +215,12 @@ module DirectEditorProps = {
       ~decorations?,
       ~editable?,
       ~attributes?,
-      ~attributesFn?,
       ~scrollThreshold?,
-      ~scrollThresholdObj?,
       ~scrollMargin?,
-      ~scrollMarginObj?,
       ~state,
-      ~dispatchTransaction?,
+      ~dispatchTransaction=?dispatchTransaction->Belt.Option.map(DispatchTransaction.make),
       (),
     );
-  };
 };
 
 [@bs.module "prosemirror-view"] [@bs.new]

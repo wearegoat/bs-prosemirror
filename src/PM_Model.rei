@@ -177,10 +177,25 @@ module ParseRule: {
       */
 
   module GetAttrsResult: {
-    type t =
-      | NoMatch
-      | Empty
-      | Attrs(Attrs.t);
+    type t;
+    let noMatch: unit => t;
+    let empty: unit => t;
+    let attrs: Attrs.t => t;
+  };
+  module GetAttrs: {
+    type t;
+    let fromNodeFn: (Dom.node => GetAttrsResult.t) => t;
+    let fromStringFn: (string => GetAttrsResult.t) => t;
+  };
+  module ContentElement: {
+    type t;
+    let fromNode: (Dom.node => Dom.node) => t;
+    let fromString: string => t;
+  };
+  module PreserveWhitespace: {
+    type t;
+    let make: bool => t;
+    let full: t;
   };
   type t;
   let t:
@@ -195,13 +210,10 @@ module ParseRule: {
       ~ignore: bool=?,
       ~skip: bool=?,
       ~attrs: Attrs.t=?,
-      ~getAttrsWithNode: Dom.node => GetAttrsResult.t=?,
-      ~getAttrsWithString: string => GetAttrsResult.t=?,
-      ~contentElementWithNode: Dom.node => Dom.node=?,
-      ~contentElementWithString: string => Dom.node=?,
+      ~getAttrs: GetAttrs.t=?,
+      ~contentElement: ContentElement.t=?,
       ~getContent: (Dom.node, PM_Types.schema) => PM_Types.fragment=?,
-      ~preserveWhitespaceFull: string=?,
-      ~preserveWhitespace: bool=?,
+      ~preserveWhitespace: PreserveWhitespace.t=?,
       unit
     ) =>
     t;
@@ -1712,10 +1724,10 @@ module ParseOptions: {
    A set of additional nodes to count as context when parsing, above the given top node.
    */
   type t;
+  module PreserveWhitespace = ParseRule.PreserveWhitespace;
   let t:
     (
-      ~preserveWhitespaceFull: string=?,
-      ~preserveWhitespace: bool=?,
+      ~preserveWhitespace: PreserveWhitespace.t=?,
       ~findPositions: array({
                         .
                         "node": Dom.node,

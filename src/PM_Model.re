@@ -1,8 +1,8 @@
 module Types = PM_Types;
 module Attrs = {
   type t;
-  let make: Js.t({..}) => t = a => Obj.magic(a);
-  let toJs: t => Js.t({..}) = a => Obj.magic(a);
+  external make: Js.t({..}) => t = "%identity";
+  external toJs: t => Js.t({..}) = "%identity";
   let empty: unit => t = () => make(Js.Obj.empty());
 };
 
@@ -24,18 +24,20 @@ module DOMOutputSpec = {
     | Node(string, DOMAttrs.t, spec): spec
     | Text(string): spec
     | Hole: spec;
-  type t;
-  let fromString: string => t = a => Obj.magic(a);
-  let fromDomNode: Dom.node => t = a => Obj.magic(a);
+  [@unboxed]
+  type t =
+    | Any('a): t;
+  let fromString: string => t = a => Any(a);
+  let fromDomNode: Dom.node => t = a => Any(a);
   let fromSpec: spec => t =
     a => {
       let rec run: spec => t =
         a =>
           switch (a) {
-          | LeafNode(str, obj) => (str, obj) |> Obj.magic
-          | Hole => Obj.magic(0)
-          | Text(text) => Obj.magic(text)
-          | Node(str, obj, y) => (str, obj, run(y)) |> Obj.magic
+          | LeafNode(str, obj) => Any((str, obj))
+          | Hole => Any(0)
+          | Text(text) => Any(text)
+          | Node(str, obj, y) => Any((str, obj, run(y)))
           };
       run(a);
     };
@@ -80,106 +82,65 @@ module DOMSerializer = {
 
 module ParseRule = {
   module GetAttrsResult = {
+    [@unboxed]
     type t =
-      | NoMatch
-      | Empty
-      | Attrs(Attrs.t);
-    type js;
-    let toJs: t => js =
-      a => {
-        switch (a) {
-        | NoMatch => Obj.magic(false)
-        | Empty => Obj.magic(Js.Nullable.null)
-        | Attrs(attrs) => Obj.magic(attrs)
-        };
-      };
+      | Any('a): t;
+    let noMatch = () => Any(false);
+    let empty = () => Any(Js.Nullable.null);
+    let attrs = attrs => Any(attrs);
+  };
+  module GetAttrs = {
+    [@unboxed]
+    type t =
+      | Any('a): t;
+    let fromNodeFn = fn => Any(fn);
+    let fromStringFn = fn => Any(fn);
+  };
+  module ContentElement = {
+    [@unboxed]
+    type t =
+      | Any('a): t;
+    let fromNode = fn => Any(fn)
+    let fromString = s => Any(s);
+  };
+  module PreserveWhitespace = {
+    [@unboxed]
+    type t =
+      | Any('a): t;
+    let make = b => Any(b);
+    let full = Any("full");
   };
 
-  module Ext = {
-    [@bs.deriving abstract]
-    type t = {
-      [@bs.optional]
-      tag: string,
-      [@bs.optional]
-      namespace: string,
-      [@bs.optional]
-      style: string,
-      [@bs.optional]
-      priority: int,
-      [@bs.optional]
-      context: string,
-      [@bs.optional]
-      node: string,
-      [@bs.optional]
-      mark: string,
-      [@bs.optional]
-      ignore: bool,
-      [@bs.optional]
-      skip: bool,
-      [@bs.optional]
-      attrs: Attrs.t,
-      [@bs.optional] [@bs.as "getAttrs"]
-      getAttrsWithNode: Dom.node => GetAttrsResult.js,
-      [@bs.optional] [@bs.as "getAttrs"]
-      getAttrsWithString: string => GetAttrsResult.js,
-      [@bs.optional] [@bs.as "contentElement"]
-      contentElementWithNode: Dom.node => Dom.node,
-      [@bs.optional] [@bs.as "contentElement"]
-      contentElementWithString: string => Dom.node,
-      [@bs.optional]
-      getContent: (Dom.node, Types.schema) => Types.fragment,
-      // Only possible value is "full"
-      [@bs.optional] [@bs.as "preserveWhitespace"]
-      preserveWhitespaceFull: string,
-      [@bs.optional]
-      preserveWhitespace: bool,
-    };
-  };
-
-  type t = Ext.t;
-
-  let t =
-      (
-        ~tag: option(string)=?,
-        ~namespace: option(string)=?,
-        ~style: option(string)=?,
-        ~priority: option(int)=?,
-        ~context: option(string)=?,
-        ~node: option(string)=?,
-        ~mark: option(string)=?,
-        ~ignore: option(bool)=?,
-        ~skip: option(bool)=?,
-        ~attrs: option(Attrs.t)=?,
-        ~getAttrsWithNode: option(Dom.node => GetAttrsResult.t)=?,
-        ~getAttrsWithString: option(string => GetAttrsResult.t)=?,
-        ~contentElementWithNode: option(Dom.node => Dom.node)=?,
-        ~contentElementWithString: option(string => Dom.node)=?,
-        ~getContent: option((Dom.node, Types.schema) => Types.fragment)=?,
-        ~preserveWhitespaceFull: option(string)=?,
-        ~preserveWhitespace: option(bool)=?,
-        (),
-      ) => {
-    let fnResultToJs = fnO => fnO->Belt.Option.map((fn, x) => GetAttrsResult.toJs(fn(x)));
-    Ext.t(
-      ~tag?,
-      ~namespace?,
-      ~style?,
-      ~priority?,
-      ~context?,
-      ~node?,
-      ~mark?,
-      ~ignore?,
-      ~skip?,
-      ~attrs?,
-      ~getAttrsWithNode=?getAttrsWithNode |> fnResultToJs,
-      ~getAttrsWithString=?getAttrsWithString |> fnResultToJs,
-      ~contentElementWithNode?,
-      ~contentElementWithString?,
-      ~getContent?,
-      ~preserveWhitespaceFull?,
-      ~preserveWhitespace?,
-      (),
-    );
+  [@bs.deriving abstract]
+  type t = {
+    [@bs.optional]
+    tag: string,
+    [@bs.optional]
+    namespace: string,
+    [@bs.optional]
+    style: string,
+    [@bs.optional]
+    priority: int,
+    [@bs.optional]
+    context: string,
+    [@bs.optional]
+    node: string,
+    [@bs.optional]
+    mark: string,
+    [@bs.optional]
+    ignore: bool,
+    [@bs.optional]
+    skip: bool,
+    [@bs.optional]
+    attrs: Attrs.t,
+    [@bs.optional]
+    getAttrs: GetAttrs.t,
+    [@bs.optional]
+    contentElement: ContentElement.t,
+    [@bs.optional]
+    getContent: (Dom.node, Types.schema) => Types.fragment,
+    [@bs.optional]
+    preserveWhitespace: PreserveWhitespace.t,
   };
 };
 
@@ -278,8 +239,8 @@ module NodeRange = {
 module NodeSpec = {
   module Custom = {
     type t;
-    let fromJs: Js.t({..}) => t = Obj.magic;
-    let toJs: t => Js.t({..}) = Obj.magic;
+    external fromJs: Js.t({..}) => t = "%identity";
+    external toJs: t => Js.t({..}) = "%identity";
   };
 
   let toOption = Js.Null_undefined.toOption;
@@ -721,13 +682,11 @@ module Fragment = {
 };
 
 module ParseOptions = {
+  module PreserveWhitespace = ParseRule.PreserveWhitespace;
   [@bs.deriving abstract]
   type t = {
-    // Only possible value is "full"
-    [@bs.optional] [@bs.as "preserveWhitespace"]
-    preserveWhitespaceFull: string,
     [@bs.optional]
-    preserveWhitespace: bool,
+    preserveWhitespace: PreserveWhitespace.t,
     [@bs.optional]
     findPositions:
       array({

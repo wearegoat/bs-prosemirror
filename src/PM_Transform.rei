@@ -372,11 +372,6 @@ module ReplaceAroundStep: {
 module Transform: {
   module type T = {
     type t;
-    /**
-  Create a transform that starts with the given document.
-  new Transform(doc: Node)
-  */
-    let make: (~doc: PM_Model.Node.t) => t;
 
     /**
   doc: Node
@@ -705,5 +700,11 @@ module Transform: {
   };
   module Make: (M: {type t;}) => T with type t := M.t;
   type t;
+  
+  /**
+  Create a transform that starts with the given document.
+  new Transform(doc: Node)
+  */
+  let make: (~doc: PM_Model.Node.t) => t;
   include T with type t := t;
 };

@@ -229,9 +229,8 @@ external make:
   "EditorView";
 
 [@bs.module "prosemirror-view"] [@bs.new]
-external makeWithNullExt: (Js.Nullable.t(unit), DirectEditorProps.t) => t = "EditorView";
-
-let makeWithNull = makeWithNullExt(Js.Nullable.null);
+external makeWithNull: ([@bs.as {json|null|json}] _, DirectEditorProps.t) => t =
+  "EditorView";
 
 [@bs.get] external state: t => PM_State.EditorState.t = "state";
 

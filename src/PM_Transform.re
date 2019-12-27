@@ -289,7 +289,6 @@ module ReplaceAroundStep = {
 module Transform = {
   module type T = {
     type t;
-    let make: (~doc: Model.Node.t) => t;
     let doc: t => Model.Node.t;
     let steps: t => array(Step.t);
     let docs: t => array(Model.Node.t);
@@ -429,10 +428,6 @@ possible.
 
   module Make = (M: {type t;}) : (T with type t := M.t) => {
     type t = M.t;
-
-    [@bs.module "prosemirror-transform"] [@bs.new]
-    external make: (~doc: Model.Node.t) => t = "Transform";
-
     [@bs.get] external doc: t => Model.Node.t = "doc";
     [@bs.get] external steps: t => array(Step.t) = "steps";
     [@bs.get] external docs: t => array(Model.Node.t) = "docs";
@@ -601,7 +596,8 @@ possible.
   };
 
   type t;
-
+  [@bs.module "prosemirror-transform"] [@bs.new]
+  external make: (~doc: Model.Node.t) => t = "Transform";
   include Make({
     type nonrec t = t;
   });

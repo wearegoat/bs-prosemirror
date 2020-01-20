@@ -356,7 +356,7 @@ module EditorState: {
         ~doc: PM_Model.Node.t=?,
         ~selection: Selection.t=?,
         ~storedMarks: array(PM_Model.Mark.t)=?,
-        ~plugins: array(PM_Types.plugin)=?,
+        ~plugins: array(PM_Types.untypedPlugin)=?,
         unit
       ) =>
       t;
@@ -389,7 +389,7 @@ module EditorState: {
     The plugins that are active in this state.
     plugins: [Plugin]
    */
-  let plugins: t => array(PM_Types.plugin);
+  let plugins: t => array(PM_Types.untypedPlugin);
 
   /**
     Apply the given transaction to produce a new state.
@@ -427,7 +427,7 @@ module EditorState: {
     Serialize this state to JSON. If you want to serialize the state of plugins, pass an object mapping property names to use in the resulting JSON object to plugin objects. The argument may also be a string or number, in which case it is ignored, to support the way JSON.stringify calls toString methods.
     toJSON(pluginFields: ?⁠Object<Plugin> | string | number) → Object
    */
-  let toJSONWithPluginFields: (t, Js.Dict.t(PM_Types.plugin)) => Js.Json.t;
+  let toJSONWithPluginFields: (t, Js.Dict.t(PM_Types.untypedPlugin)) => Js.Json.t;
 
   /**
   The `space` argument is equivalent to the same argument
@@ -446,7 +446,7 @@ module EditorState: {
     static fromJSON(config: Object, json: Object, pluginFields: ?⁠Object<Plugin>) → EditorState
    */
   let fromJSON:
-    (~config: Config.t, ~json: Js.Json.t, ~pluginFields: Js.Dict.t(PM_Types.plugin)=?, unit) => t;
+    (~config: Config.t, ~json: Js.Json.t, ~pluginFields: Js.Dict.t(PM_Types.untypedPlugin)=?, unit) => t;
 };
 
 module PluginKey: {
@@ -457,7 +457,7 @@ module PluginKey: {
 
   /** Get the active plugin with this key, if any, from an editor state. */
 
-  let get: (t('a), PM_Types.editorState) => option(PM_Types.plugin);
+  let get: (t('a), PM_Types.editorState) => option(PM_Types.plugin('a));
 
   /** Get the plugin's state from an editor state. */
   let getState: (t('a), PM_Types.editorState) => option('a);
@@ -568,8 +568,11 @@ module PluginSpec: {
 /** Plugins bundle functionality that can be added to an editor. They are part of the editor state
   and may influence that state and the view that contains it. */
 module Plugin: {
-  type t('a) = PM_Types.plugin;
+  type t('a) = PM_Types.plugin('a);
   let make: (~spec: PluginSpec.t('a)) => t('a);
+  let makeUntyped: (~spec: PluginSpec.t('a)) => PM_Types.untypedPlugin;
+  let toUntyped: t('a) => PM_Types.untypedPlugin;
+  let fromUntyped: PM_Types.untypedPlugin => t('a);
   /** The props exported by this plugin. */
   let props: t('a) => PM_EditorProps.t;
   /** The plugin's spec object */

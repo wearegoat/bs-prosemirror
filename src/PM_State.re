@@ -278,7 +278,7 @@ module EditorState = {
       [@bs.optional]
       storedMarks: array(Model.Mark.t),
       [@bs.optional]
-      plugins: array(Types.plugin),
+      plugins: array(Types.untypedPlugin),
     };
     let make = t;
   };
@@ -288,7 +288,7 @@ module EditorState = {
   [@bs.return nullable] [@bs.get]
   external storedMarks: t => option(array(Model.Mark.t)) = "storedMarks";
   [@bs.get] external schema: t => Model.Schema.t = "schema";
-  [@bs.get] external plugins: t => array(Types.plugin) = "plugins";
+  [@bs.get] external plugins: t => array(Types.untypedPlugin) = "plugins";
   [@bs.send] external apply: (t, Types.transaction) => t = "apply";
   [@bs.send]
   external applyTransaction:
@@ -303,7 +303,7 @@ module EditorState = {
   [@bs.send] external reconfigure: (t, Config.t) => t = "reconfigure";
 
   [@bs.send]
-  external toJSONWithPluginFields: (t, Js.Dict.t(Types.plugin)) => Js.Json.t =
+  external toJSONWithPluginFields: (t, Js.Dict.t(Types.untypedPlugin)) => Js.Json.t =
     "toJSONWithPluginFields";
 
   /**
@@ -319,8 +319,8 @@ module EditorState = {
   external create: Config.t => t = "create";
   [@bs.module "prosemirror-state"] [@bs.scope "EditorState"]
   external fromJSON:
-    (~config: Config.t, ~json: Js.Json.t, ~pluginFields: Js.Dict.t(Types.plugin)=?, unit) => t =
-    "fromJSON";
+    (~config: Config.t, ~json: Js.Json.t, ~pluginFields: Js.Dict.t(Types.untypedPlugin)=?, unit) 
+    => t = "fromJSON";
   /* Apply the given transaction to produce a new state. */
 };
 
@@ -331,7 +331,7 @@ module PluginKey = {
   external make: (~name: string=?, unit) => t('a) = "PluginKey";
 
   [@bs.return nullable] [@bs.send]
-  external get: (t('a), Types.editorState) => option(Types.plugin) = "get";
+  external get: (t('a), Types.editorState) => option(Types.plugin('a)) = "get";
 
   [@bs.send] external getState: (t('a), Types.editorState) => option('a) = "getState";
 };
@@ -398,11 +398,14 @@ module PluginSpec = {
 };
 
 module Plugin = {
-  type t('a) = Types.plugin;
+  type t('a) = Types.plugin('a);
 
   [@bs.module "prosemirror-state"] [@bs.new]
-  external make: (~spec: PluginSpec.t('a)) => t('a) = "Plugin";
-
+  external make: (~spec: PluginSpec.t('a)) => Types.plugin('a) = "Plugin";
+  [@bs.module "prosemirror-state"] [@bs.new]
+  external makeUntyped: (~spec: PluginSpec.t('a)) => Types.untypedPlugin = "Plugin";
+  external toUntyped: t('a) => Types.untypedPlugin = "%identity";
+  external fromUntyped: Types.untypedPlugin => t('a) = "%identity";
   [@bs.get] external props: t('a) => EditorProps.t = "props";
   [@bs.get] external spec: t('a) => PluginSpec.t('a) = "spec";
   [@bs.send] external getState: (t('a), ~state: Types.editorState) => 'a = "getState";

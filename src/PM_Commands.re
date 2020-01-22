@@ -39,7 +39,7 @@ external createParagraphNear: Command.t = "createParagraphNear";
 [@bs.module "prosemirror-commands"]
 external splitBlockKeepMarks: Command.t = "splitBlockKeepMarks";
 
-[@bs.module "prosemirror-commands"] external selectParentNode: Command.t = "selectParentNodeks";
+[@bs.module "prosemirror-commands"] external selectParentNode: Command.t = "selectParentNode";
 
 [@bs.module "prosemirror-commands"] external selectAll: Command.t = "selectAll";
 

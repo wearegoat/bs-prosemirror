@@ -23,20 +23,20 @@
     "bs-platform": "^7.0.2-dev.1",
     "bs-webapi": "^0.14.3",
     "bsb-js": "^1.1.7",
-    "parcel-bundler": "^1.12.3"
+    "parcel-bundler": "^1.12.4"
   },
   "dependencies": {
-    "prosemirror-commands": "^1.0.7",
-    "prosemirror-dropcursor": "^1.1.1",
-    "prosemirror-history": "^1.0.4",
-    "prosemirror-keymap": "^1.0.1",
-    "prosemirror-model": "^1.7.0",
-    "prosemirror-schema-basic": "^1.0.1",
-    "prosemirror-schema-list": "^1.0.3",
-    "prosemirror-state": "^1.2.2",
-    "prosemirror-transform": "^1.1.3",
-    "prosemirror-view": "^1.9.0",
+    "prosemirror-changeset": "^2.1.2",
+    "prosemirror-commands": "^1.1.3",
+    "prosemirror-dropcursor": "^1.3.2",
+    "prosemirror-history": "^1.1.3",
     "prosemirror-inputrules": "^1.0.4",
-    "prosemirror-changeset": "^2.1.2"
+    "prosemirror-keymap": "^1.1.3",
+    "prosemirror-model": "^1.9.1",
+    "prosemirror-schema-basic": "^1.1.2",
+    "prosemirror-schema-list": "^1.1.2",
+    "prosemirror-state": "^1.3.2",
+    "prosemirror-transform": "^1.2.3",
+    "prosemirror-view": "^1.13.7"
   }
 }

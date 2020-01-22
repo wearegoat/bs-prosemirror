@@ -1,6 +1,7 @@
 type t('a);
 
-[@bs.module "orderedmap"] external make: Js.Dict.t('a) => t('a) = "from";
+[@bs.module "orderedmap"][@bs.scope "default"] 
+external make: Js.Dict.t('a) => t('a) = "from";
 
 [@bs.return nullable] [@bs.send] external get: (t('a), string) => option('a) = "get";
 [@bs.send]

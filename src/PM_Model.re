@@ -748,8 +748,8 @@ module ParseOptions = {
 
 module DOMParser = {
   type t;
-  [@bs.module "prosemirror-model"][@bs.new]
-  external make: (~schema: Schema.t, ~rules: array(ParseRule.t)) => t = "DOMParser";
+  [@bs.module "prosemirror-model"] [@bs.scope "DOMParser"] [@bs.new]
+  external make: (~schema: Schema.t, ~rules: array(ParseRule.t)) => t = "make";
 
   [@bs.get] external schema: t => Schema.t = "schema";
 

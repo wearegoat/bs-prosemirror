@@ -20,7 +20,7 @@
   "author": "Alexey Golev <alexey.golev@wearegoat.com",
   "license": "MIT",
   "devDependencies": {
-    "bs-platform": ">=5.0.4",
+    "bs-platform": "^5.0.4",
     "bs-webapi": "^0.14.3",
     "bsb-js": "^1.1.7",
     "parcel-bundler": "^1.12.3"

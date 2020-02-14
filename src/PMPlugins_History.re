@@ -1,4 +1,5 @@
 module Command = PM_Command;
+
 [@bs.module "prosemirror-history"] external undo: Command.t = "undo";
 
 [@bs.module "prosemirror-history"] external redo: Command.t = "redo";

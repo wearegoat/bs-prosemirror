@@ -1,5 +1,6 @@
 module InputRule = {
   type t;
+
   [@bs.module "prosemirror-inputrules"] [@bs.new]
   external make:
     (

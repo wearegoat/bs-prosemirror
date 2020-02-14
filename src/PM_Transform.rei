@@ -3,26 +3,31 @@
 */
 module StepResult: {
   type t;
+
   /**
   The transformed document.
   doc: ?⁠Node
    */
   let doc: t => option(PM_Types.node);
+
   /**
    Text providing information about a failed step.
    failed: ?⁠string
    */
   let failed: t => option(string);
+
   /**
    Create a successful step result.
    static ok(doc: Node) → StepResult
    */
   let ok: (~doc: PM_Types.node) => t;
+
   /**
    Create a failed step result.
    static fail(message: string) → StepResult
    */
   let fail: (~message: string) => t;
+
   /**
    Call Node.replace with the given arguments. Create a successful result if it succeeds,
    and a failed one if it throws a ReplaceError.
@@ -34,24 +39,27 @@ module StepResult: {
 /** An object representing a mapped position with extra information. */
 module MapResult: {
   type t;
+
   /**
   The mapped version of the position.
   pos: number
   */
   let pos: t => int;
+
   /**
   Tells you whether the position was deleted, that is, whether the step removed its surroundings from the document.
   deleted: bool
   */
   let deleted: t => bool;
 };
+
 /**
   There are several things that positions can be mapped through. Such objects conform to this
   interface.
 */
-
 module type MAPPABLE = {
   type t;
+
   /**
       Map a position through this object. When given, assoc (should be -1 or 1, defaults to 1)
       determines with which side the position is associated, which determines in which direction to move
@@ -59,6 +67,7 @@ module type MAPPABLE = {
       map(pos: number, assoc: ?⁠number) → number
       */
   let map: (t, ~pos: int, ~assoc: int=?, unit) => int;
+
   /**
       Map a position, and return an object containing additional information about the mapping. The
       result's deleted field tells you whether the position was deleted (completely enclosed in a
@@ -68,6 +77,7 @@ module type MAPPABLE = {
       */
   let mapResult: (t, ~pos: int, ~assoc: int=?, unit) => MapResult.t;
 };
+
 module Mappable: {module Make: (M: {type t;}) => MAPPABLE;};
 
 /**
@@ -123,21 +133,25 @@ module Mapping: {
   type t;
 
   include MAPPABLE with type t := t;
+
   /**
     Create a new mapping with the given position maps.
     new Mapping(maps: ?⁠[StepMap])
    */
   let make: (~maps: array(StepMap.t)=?, unit) => t;
+
   /**
    The step maps in this mapping.
    maps: [StepMap]
   */
   let maps: t => array(StepMap.t);
+
   /**
    The starting position in the maps array, used when map or mapResult is called.
    from: number
   */
   let from: t => int;
+
   /**
    The end position in the maps array.
    to: number
@@ -178,7 +192,7 @@ module Mapping: {
 /** ProseMirror libraries rely on reflection (instanceof) for distinguishing a particular Step
   subclass. As we don't have a straightforward reflection mechanism we have to rely on some "dirty"
   tricks to figure out which subclass we are dealing with. It's implemented using a classify function
-  that returns the polymorphic variant corresponding to the given subclass using javascript 
+  that returns the polymorphic variant corresponding to the given subclass using javascript
   classname underneath */
 module StepKind: {
   type t = [
@@ -186,24 +200,25 @@ module StepKind: {
     | `ReplaceAroundStep(PM_Types.replaceAroundStep)
     | `AddMarkStep(PM_Types.addMarkStep)
     | `RemoveMarkStep(PM_Types.removeMarkStep)
-    ];
-  
-  let classify : PM_Types.step => [ t];
-  let classifyCustom:
-    (
-      PM_Types.step,
-      ~custom: (PM_Types.step, string) => option(([> t] as 'a))
-    ) =>
-    ([> t] as 'a);
-  let replaceStepToStep: PM_Types.replaceStep => PM_Types.step;
-  let replaceAroundStepToStep: PM_Types.replaceAroundStep => PM_Types.step;
-  let addMarkStepToStep: PM_Types.addMarkStep => PM_Types.step;
-  let removeMarkStepToStep: PM_Types.removeMarkStep => PM_Types.step;
-  let toStep: t => PM_Types.step;
-  let toStepCustom:
-    (~custom: ([> t] as 'a) => PM_Types.step, [> t] as 'a) => PM_Types.step;
-};
+  ];
 
+  let classify: PM_Types.step => t;
+
+  let classifyCustom:
+    (PM_Types.step, ~custom: (PM_Types.step, string) => option([> t] as 'a)) => ([> t] as 'a);
+
+  let replaceStepToStep: PM_Types.replaceStep => PM_Types.step;
+
+  let replaceAroundStepToStep: PM_Types.replaceAroundStep => PM_Types.step;
+
+  let addMarkStepToStep: PM_Types.addMarkStep => PM_Types.step;
+
+  let removeMarkStepToStep: PM_Types.removeMarkStep => PM_Types.step;
+
+  let toStep: t => PM_Types.step;
+
+  let toStepCustom: (~custom: ([> t] as 'a) => PM_Types.step, [> t] as 'a) => PM_Types.step;
+};
 
 /**
 A step object represents an atomic change.
@@ -214,13 +229,18 @@ with a unique JSON-serialization identifier using Step.jsonID.
  */
 module Step: {
   type t = PM_Types.step;
+
   module type M = {
     type t;
+
     type inverted;
   };
+
   module type T = {
     type t;
+
     type inverted;
+
     /**
     Applies this step to the given document, returning a result object that either
     indicates failure, if the step can not be applied to this document, or indicates success
@@ -228,18 +248,21 @@ module Step: {
     apply(doc: Node) → StepResult
     */
     let apply: (t, ~doc: PM_Types.node) => StepResult.t;
+
     /**
       Get the step map that represents the changes made by this step,
       and which can be used to transform between positions in the old and the new document.
       getMap() → StepMap
     */
     let getMap: t => StepMap.t;
+
     /**
       Create an inverted version of this step.
       Needs the document as it was before the step as argument.
       invert(doc: Node) → Step
     */
     let invert: (t, ~doc: PM_Types.node) => inverted;
+
     /**
       Map this step through a mappable thing, returning either a
       version of that step with its positions adjusted, or null if the step
@@ -247,12 +270,14 @@ module Step: {
       map(mapping: Mappable) → ?⁠Step
     */
     let map: (t, ~mapping: Mapping.t) => option(t);
+
     /**
       Try to merge this step with another one, to be applied directly after it.
       Returns the merged step when possible, null if the steps can't be merged.
       merge(other: Step) → ?⁠Step
     */
     let merge: (t, ~other: t) => option(t);
+
     /**
       Create a JSON-serializeable representation of this step.
       When defining this for a custom subclass, make sure the result object includes
@@ -260,12 +285,14 @@ module Step: {
       toJSON() → Object
     */
     let toJSON: t => Js.Json.t;
+
     /**
       Deserialize a step from its JSON representation.
       Will call through to the step class' own implementation of this method.
       static fromJSON(schema: Schema, json: Object) → Step
     */
     let fromJSON: (PM_Model.Schema.t, Js.Json.t) => t;
+
     /**
       To be able to serialize steps to JSON, each step needs a string ID to attach
       to its JSON representation. Use this method to register an ID for your step classes.
@@ -274,52 +301,71 @@ module Step: {
     */
     let jsonID: (~id: string, ~stepClass: t) => t;
   };
-  module Make : (M: M) => T with type t := M.t and type inverted := M.inverted;
+
+  module Make: (M: M) => T with type t := M.t and type inverted := M.inverted;
+
   module type Subclass = {
     include T;
+
     let toStep: t => PM_Types.step;
   };
+
   include T with type t := t and type inverted := t;
+
   let classify: PM_Types.step => [ StepKind.t];
+
   let classifyCustom:
-    (
-      PM_Types.step,
-      ~custom: (PM_Types.step, string) => option([> StepKind.t] as 'a)
-    ) =>
+    (PM_Types.step, ~custom: (PM_Types.step, string) => option([> StepKind.t] as 'a)) =>
     ([> StepKind.t] as 'a);
+
   let toStep: StepKind.t => PM_Types.step;
+
   let toStepCustom:
-    (~custom: ([> StepKind.t] as 'a) => PM_Types.step, [> StepKind.t] as 'a) =>
-    PM_Types.step;
+    (~custom: ([> StepKind.t] as 'a) => PM_Types.step, [> StepKind.t] as 'a) => PM_Types.step;
 };
 
 /** Add a mark to all inline content between two positions.*/
 module AddMarkStep: {
   type t = PM_Types.addMarkStep;
+
   type inverted = PM_Types.removeMarkStep;
+
   include Step.Subclass with type t := t and type inverted := inverted;
+
   let make: (~from: int, ~to_: int, ~mark: PM_Model.Mark.t) => t;
+
   let from: t => int;
+
   let to_: t => int;
+
   let mark: t => PM_Model.Mark.t;
 };
 
 /** Remove a mark from all inline content between two positions. */
 module RemoveMarkStep: {
   type t = PM_Types.removeMarkStep;
+
   type inverted = PM_Types.addMarkStep;
+
   include Step.Subclass with type t := t and type inverted := inverted;
+
   let make: (~from: int, ~to_: int, ~mark: PM_Model.Mark.t) => t;
+
   let from: t => int;
+
   let to_: t => int;
+
   let mark: t => PM_Model.Mark.t;
 };
 
 /** Replace a part of the document with a slice of new content. */
 module ReplaceStep: {
   type t = PM_Types.replaceStep;
+
   type inverted = t;
+
   include Step.Subclass with type t := t and type inverted := inverted;
+
   /**
     The given slice should fit the 'gap' between from and to—the depths must line up, and the
     surrounding nodes must be able to be joined with the open sides of the slice. When structure is
@@ -329,9 +375,13 @@ module ReplaceStep: {
     new ReplaceStep(from: number, to: number, slice: Slice, structure: ?⁠bool)
    */
   let make: (~from: int, ~to_: int, ~slice: PM_Model.Slice.t, ~structure: bool=?, unit) => t;
+
   let from: t => int;
+
   let to_: t => int;
+
   let slice: t => PM_Model.Slice.t;
+
   let structure: t => bool;
 };
 
@@ -339,8 +389,11 @@ module ReplaceStep: {
   content by moving it into the slice. */
 module ReplaceAroundStep: {
   type t = PM_Types.replaceAroundStep;
+
   type inverted = t;
+
   include Step.Subclass with type t := t and type inverted := inverted;
+
   let make:
     (
       ~from: int,
@@ -353,12 +406,19 @@ module ReplaceAroundStep: {
       unit
     ) =>
     t;
+
   let from: t => int;
+
   let to_: t => int;
+
   let gapFrom: t => int;
+
   let gapTo: t => int;
+
   let slice: t => PM_Model.Slice.t;
+
   let insert: t => int;
+
   let structure: t => bool;
 };
 
@@ -374,65 +434,65 @@ module Transform: {
     type t;
 
     /**
-  doc: Node
-  The current document (the result of applying the steps in the transform).
-  */
+      doc: Node
+      The current document (the result of applying the steps in the transform).
+     */
     let doc: t => PM_Model.Node.t;
 
     /**
-  The steps in this transform.
-  steps: [Step]
-  */
+      The steps in this transform.
+      steps: [Step]
+     */
     let steps: t => array(Step.t);
 
     /**
-  The documents before each of the steps.
-  docs: [Node]
-  */
+      The documents before each of the steps.
+      docs: [Node]
+     */
     let docs: t => array(PM_Model.Node.t);
 
     /**
-  A mapping with the maps for each of the steps in this transform.
-  mapping: Mapping
-  */
+      A mapping with the maps for each of the steps in this transform.
+      mapping: Mapping
+     */
     let mapping: t => Mapping.t;
 
     /**
-  The starting document.
-  before: Node
-  */
+      The starting document.
+      before: Node
+     */
     let before: t => PM_Model.Node.t;
 
     /**
-  Apply a new step in this transform, saving the result. Throws an error when the step fails.
-  step(step: Step) → this
-  */
+      Apply a new step in this transform, saving the result. Throws an error when the step fails.
+      step(step: Step) → this
+     */
     let step: (t, ~step: Step.t) => t;
 
     /**
-  Try to apply a step in this transformation, ignoring it if it fails. Returns the step result.
-  maybeStep(step: Step) → StepResult
-  */
+      Try to apply a step in this transformation, ignoring it if it fails. Returns the step result.
+      maybeStep(step: Step) → StepResult
+     */
     let maybeStep: (t, ~step: Step.t) => StepResult.t;
 
     /**
-  True when the document has been changed (when there are any steps).
-  docChanged: bool
-  */
+      True when the document has been changed (when there are any steps).
+      docChanged: bool
+     */
     let docChanged: t => bool;
 
     /**
-  Add the given mark to the inline content between from and to.
-  addMark(from: number, to: number, mark: Mark) → this
-  */
+      Add the given mark to the inline content between from and to.
+      addMark(from: number, to: number, mark: Mark) → this
+     */
     let addMark: (t, ~from: int, ~to_: int, ~mark: PM_Model.Mark.t) => t;
 
     /**
-  Remove marks from inline nodes between from and to. When mark is a single mark, remove precisely
-  that mark. When it is a mark type, remove all marks of that type. When it is null, remove all
-  marks of any type.
-  removeMark(from: number, to: number, mark: ?⁠Mark | MarkType = null) → this
-  */
+      Remove marks from inline nodes between from and to. When mark is a single mark, remove precisely
+      that mark. When it is a mark type, remove all marks of that type. When it is null, remove all
+      marks of any type.
+      removeMark(from: number, to: number, mark: ?⁠Mark | MarkType = null) → this
+     */
     let removeMark:
       (
         t,
@@ -444,24 +504,24 @@ module Transform: {
       t;
 
     /**
-  Removes all marks and nodes from the content of the node at pos that don't match the given new
-  parent node type. Accepts an optional starting content match as third argument.
-  clearIncompatible(pos: number, parentType: NodeType, match: ?⁠ContentMatch) → this
-  */
+      Removes all marks and nodes from the content of the node at pos that don't match the given new
+      parent node type. Accepts an optional starting content match as third argument.
+      clearIncompatible(pos: number, parentType: NodeType, match: ?⁠ContentMatch) → this
+     */
     let clearIncompatible:
       (t, ~pos: int, ~parentType: PM_Model.NodeType.t, ~match: PM_Model.ContentMatch.t=?, unit) =>
       t;
 
     /**
-  Replace the part of the document between from and to with the given slice.
-  replace(from: number, to: ?⁠number = from, slice: ?⁠Slice = Slice.empty) → this
-  */
+      Replace the part of the document between from and to with the given slice.
+      replace(from: number, to: ?⁠number = from, slice: ?⁠Slice = Slice.empty) → this
+     */
     let replace: (t, ~from: int, ~to_: int=?, ~slice: PM_Model.Slice.t=?, unit) => t;
 
     /**
-  Replace the given range with the given content, which may be a fragment, node, or array of nodes.
-  replaceWith(from: number, to: number, content: Fragment | Node | [Node]) → this
-  */
+      Replace the given range with the given content, which may be a fragment, node, or array of nodes.
+      replaceWith(from: number, to: number, content: Fragment | Node | [Node]) → this
+     */
     let replaceWith:
       (
         t,
@@ -476,15 +536,15 @@ module Transform: {
       t;
 
     /**
-  Delete the content between the given positions.
-  delete(from: number, to: number) → this
-  */
+      Delete the content between the given positions.
+      delete(from: number, to: number) → this
+     */
     let delete: (t, ~from: int, ~to_: int) => t;
 
     /**
-  Insert the given content at the given position.
-  insert(pos: number, content: Fragment | Node | [Node]) → this
-  */
+      Insert the given content at the given position.
+      insert(pos: number, content: Fragment | Node | [Node]) → this
+     */
     let insert:
       (
         t,
@@ -498,48 +558,48 @@ module Transform: {
       t;
 
     /**
-  Replace a range of the document with a given slice, using from, to, and the slice's openStart
-  property as hints, rather than fixed start and end points. This method may grow the replaced area
-  or close open nodes in the slice in order to get a fit that is more in line with WYSIWYG
-  expectations, by dropping fully covered parent nodes of the replaced region when they are marked
-  non-defining, or including an open parent node from the slice that is marked as defining. This is
-  the method, for example, to handle paste. The similar replace method is a more primitive tool
-  which will not move the start and end of its given range, and is useful in situations where you
-  need more precise control over what happens.
-  replaceRange(from: number, to: number, slice: Slice) → this
-  */
+      Replace a range of the document with a given slice, using from, to, and the slice's openStart
+      property as hints, rather than fixed start and end points. This method may grow the replaced area
+      or close open nodes in the slice in order to get a fit that is more in line with WYSIWYG
+      expectations, by dropping fully covered parent nodes of the replaced region when they are marked
+      non-defining, or including an open parent node from the slice that is marked as defining. This is
+      the method, for example, to handle paste. The similar replace method is a more primitive tool
+      which will not move the start and end of its given range, and is useful in situations where you
+      need more precise control over what happens.
+      replaceRange(from: number, to: number, slice: Slice) → this
+     */
     let replaceRange: (t, ~from: int, ~to_: int, ~slice: PM_Model.Slice.t) => t;
 
     /**
-  Replace the given range with a node, but use from and to as hints, rather than precise positions.
-  When from and to are the same and are at the start or end of a parent node in which the given node
-  doesn't fit, this method may move them out towards a parent that does allow the given node to be
-  placed. When the given range completely covers a parent node, this method may completely replace
-  that parent node.
-  replaceRangeWith(from: number, to: number, node: Node) → this
-  */
+      Replace the given range with a node, but use from and to as hints, rather than precise positions.
+      When from and to are the same and are at the start or end of a parent node in which the given node
+      doesn't fit, this method may move them out towards a parent that does allow the given node to be
+      placed. When the given range completely covers a parent node, this method may completely replace
+      that parent node.
+      replaceRangeWith(from: number, to: number, node: Node) → this
+     */
     let replaceRangeWith: (t, ~from: int, ~to_: int, ~node: PM_Model.Node.t) => t;
 
     /**
-  Delete the given range, expanding it to cover fully covered parent nodes until a valid replace is
-  found.
-  deleteRange(from: number, to: number) → this
-  */
+      Delete the given range, expanding it to cover fully covered parent nodes until a valid replace is
+      found.
+      deleteRange(from: number, to: number) → this
+     */
     let deleteRange: (t, ~from: int, ~to_: int) => t;
 
     /**
-  Split the content in the given range off from its parent, if there is sibling content before or
-  after it, and move it up the tree to the depth specified by target. You'll probably want to use
-  liftTarget to compute target, to make sure the lift is valid.
-  lift(range: NodeRange, target: number) → this
-  */
+      Split the content in the given range off from its parent, if there is sibling content before or
+      after it, and move it up the tree to the depth specified by target. You'll probably want to use
+      liftTarget to compute target, to make sure the lift is valid.
+      lift(range: NodeRange, target: number) → this
+     */
     let lift: (t, ~range: PM_Model.NodeRange.t, ~target: int) => t;
 
     /**
-  Wrap the given range in the given set of wrappers. The wrappers are assumed to be valid in this
-  position, and should probably be computed with findWrapping.
-  wrap(range: NodeRange, wrappers: [{type: NodeType, attrs: ?⁠Object}]) → this
-  */
+      Wrap the given range in the given set of wrappers. The wrappers are assumed to be valid in this
+      position, and should probably be computed with findWrapping.
+      wrap(range: NodeRange, wrappers: [{type: NodeType, attrs: ?⁠Object}]) → this
+     */
     let wrap:
       (
         t,
@@ -553,10 +613,10 @@ module Transform: {
       t;
 
     /**
-  Set the type of all textblocks (partly) between from and to to the given node type with the given
-  attributes.
-  setBlockType(from: number, to: ?⁠number = from, type: NodeType, attrs: ?⁠Object) → this
-  */
+      Set the type of all textblocks (partly) between from and to to the given node type with the given
+      attributes.
+      setBlockType(from: number, to: ?⁠number = from, type: NodeType, attrs: ?⁠Object) → this
+     */
     let setBlockType:
       (
         t,
@@ -569,10 +629,10 @@ module Transform: {
       t;
 
     /**
-  Change the type, attributes, and/or marks of the node at pos. When type isn't given, the existing
-  node type is preserved,
-  setNodeMarkup(pos: number, type: ?⁠NodeType, attrs: ?⁠Object, marks: ?⁠[Mark]) → this
-  */
+      Change the type, attributes, and/or marks of the node at pos. When type isn't given, the existing
+      node type is preserved,
+      setNodeMarkup(pos: number, type: ?⁠NodeType, attrs: ?⁠Object, marks: ?⁠[Mark]) → this
+     */
     let setNodeMarkup:
       (
         t,
@@ -585,11 +645,11 @@ module Transform: {
       t;
 
     /**
-  Split the node at the given position, and optionally, if depth is greater than one, any number of
-  nodes above that. By default, the parts split off will inherit the node type of the original node.
-  This can be changed by passing an array of types and attributes to use after the split.
-  split(pos: number, depth: ?⁠number = 1, typesAfter: ?⁠[?⁠{type: NodeType, attrs: ?⁠Object}]) → this
-  */
+      Split the node at the given position, and optionally, if depth is greater than one, any number of
+      nodes above that. By default, the parts split off will inherit the node type of the original node.
+      This can be changed by passing an array of types and attributes to use after the split.
+      split(pos: number, depth: ?⁠number = 1, typesAfter: ?⁠[?⁠{type: NodeType, attrs: ?⁠Object}]) → this
+     */
     let split:
       (
         t,
@@ -606,39 +666,39 @@ module Transform: {
       t;
 
     /**
-  Join the blocks around the given position. If depth is 2, their last and first siblings are also
-  joined, and so on.
-  join(pos: number, depth: ?⁠number = 1) → this
-  */
+      Join the blocks around the given position. If depth is 2, their last and first siblings are also
+      joined, and so on.
+      join(pos: number, depth: ?⁠number = 1) → this
+     */
     let join: (t, ~pos: int, ~depth: int=?, unit) => t;
 
     /** The following helper functions can be useful when creating transformations or determining
-  whether they are even possible. */
+      whether they are even possible. */
 
     /**
-  ‘Fit’ a slice into a given position in the document, producing a step that
-  inserts it. Will return null if there's no meaningful way to insert the slice
-  here, or inserting it would be a no-op (an empty slice over an empty range).
-  replaceStep(doc: Node, from: number, to: ?⁠number = from, slice: ?⁠Slice = Slice.empty) → ?⁠Step
-  */
+      ‘Fit’ a slice into a given position in the document, producing a step that
+      inserts it. Will return null if there's no meaningful way to insert the slice
+      here, or inserting it would be a no-op (an empty slice over an empty range).
+      replaceStep(doc: Node, from: number, to: ?⁠number = from, slice: ?⁠Slice = Slice.empty) → ?⁠Step
+     */
     let replaceStep:
       (~doc: PM_Model.Node.t, ~from: int, ~to_: int=?, ~slice: PM_Model.Slice.t=?, unit) =>
       option(Step.t);
 
     /**
-  Try to find a target depth to which the content in the given range can be lifted. Will not go
-  across isolating parent nodes.
-  liftTarget(range: NodeRange) → ?⁠number
-  */
+      Try to find a target depth to which the content in the given range can be lifted. Will not go
+      across isolating parent nodes.
+      liftTarget(range: NodeRange) → ?⁠number
+     */
     let liftTarget: (~range: PM_Model.NodeRange.t) => option(int);
 
     /**
-  Try to find a valid way to wrap the content in the given range in a node of the given type. May
-  introduce extra nodes around and inside the wrapper node, if necessary. Returns null if no valid
-  wrapping could be found. When innerRange is given, that range's content is used as the content to
-  fit into the wrapping, instead of the content of range.
-  findWrapping(range: NodeRange, nodeType: NodeType, attrs: ?⁠Object, innerRange: ?⁠NodeRange = range) → ?⁠[{type: NodeType, attrs: ?⁠Object}]
-  */
+      Try to find a valid way to wrap the content in the given range in a node of the given type. May
+      introduce extra nodes around and inside the wrapper node, if necessary. Returns null if no valid
+      wrapping could be found. When innerRange is given, that range's content is used as the content to
+      fit into the wrapping, instead of the content of range.
+      findWrapping(range: NodeRange, nodeType: NodeType, attrs: ?⁠Object, innerRange: ?⁠NodeRange = range) → ?⁠[{type: NodeType, attrs: ?⁠Object}]
+     */
     let findWrapping:
       (
         ~range: PM_Model.NodeRange.t,
@@ -656,9 +716,9 @@ module Transform: {
       );
 
     /**
-  Check whether splitting at the given position is allowed.
-  canSplit(doc: Node, pos: number, depth: ?⁠number = 1, typesAfter: ?⁠[?⁠{type: NodeType, attrs: ?⁠Object}]) → bool
-  */
+      Check whether splitting at the given position is allowed.
+      canSplit(doc: Node, pos: number, depth: ?⁠number = 1, typesAfter: ?⁠[?⁠{type: NodeType, attrs: ?⁠Object}]) → bool
+     */
     let canSplit:
       (
         ~doc: PM_Model.Node.t,
@@ -673,38 +733,42 @@ module Transform: {
         unit
       ) =>
       bool;
+
     /**
-  Test whether the blocks before and after a given position can be joined.
-  canJoin(doc: Node, pos: number) → bool
-  */
+      Test whether the blocks before and after a given position can be joined.
+      canJoin(doc: Node, pos: number) → bool
+     */
     let canJoin: (~doc: PM_Model.Node.t, ~pos: int) => bool;
 
     /**
-  Find an ancestor of the given position that can be joined to the block before (or after if dir is positive). Returns the joinable point, if any.
-  joinPoint(doc: Node, pos: number, dir: ?⁠number = -1) → ?⁠number
-  */
+      Find an ancestor of the given position that can be joined to the block before (or after if dir is positive). Returns the joinable point, if any.
+      joinPoint(doc: Node, pos: number, dir: ?⁠number = -1) → ?⁠number
+     */
     let joinPoint: (~doc: PM_Model.Node.t, ~pos: int, ~dir: int=?, unit) => option(int);
 
     /**
-  Try to find a point where a node of the given type can be inserted near pos, by searching up the node hierarchy when pos itself isn't a valid place but is at the start or end of a node. Return null if no position was found.
-  insertPoint(doc: Node, pos: number, nodeType: NodeType) → ?⁠number
-  */
+      Try to find a point where a node of the given type can be inserted near pos, by searching up the node hierarchy when pos itself isn't a valid place but is at the start or end of a node. Return null if no position was found.
+      insertPoint(doc: Node, pos: number, nodeType: NodeType) → ?⁠number
+     */
     let insertPoint:
       (~doc: PM_Model.Node.t, ~pos: int, ~nodeType: PM_Model.NodeType.t) => option(int);
 
     /**
-  Finds a position at or around the given position where the given slice can be inserted. Will look at parent nodes' nearest boundary and try there, even if the original position wasn't directly at the start or end of that node. Returns null when no position was found.
-  dropPoint(doc: Node, pos: number, slice: Slice) → ?⁠number
-  */
+      Finds a position at or around the given position where the given slice can be inserted. Will look at parent nodes' nearest boundary and try there, even if the original position wasn't directly at the start or end of that node. Returns null when no position was found.
+      dropPoint(doc: Node, pos: number, slice: Slice) → ?⁠number
+     */
     let dropPoint: (~doc: PM_Model.Node.t, ~pos: int, ~silce: PM_Model.Slice.t) => option(int);
   };
+
   module Make: (M: {type t;}) => T with type t := M.t;
+
   type t;
-  
+
   /**
-  Create a transform that starts with the given document.
-  new Transform(doc: Node)
-  */
+    Create a transform that starts with the given document.
+    new Transform(doc: Node)
+   */
   let make: (~doc: PM_Model.Node.t) => t;
+
   include T with type t := t;
 };

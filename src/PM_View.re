@@ -48,8 +48,11 @@ module DirectEditorProps = {
     "bottom": int,
     "left": int,
   };
+
   type domEventHandler = (~view: Types.editorView, ~event: Dom.event) => bool;
+
   type keyboardEventHandler = (~view: Types.editorView, ~event: Dom.keyboardEvent) => bool;
+
   type mouseEventOnHandler =
     (
       ~view: Types.editorView,
@@ -60,12 +63,16 @@ module DirectEditorProps = {
       ~direct: bool
     ) =>
     bool;
+
   type mouseEventHandler = (~view: Types.editorView, ~pos: int, ~event: Dom.mouseEvent) => bool;
+
   type dropHandler =
     (~view: Types.editorView, ~event: Dom.event, ~slice: PM_Model.Slice.t, ~moved: bool) => bool;
+
   type createSelectionBetween =
     (~view: Types.editorView, ~anchor: PM_Model.ResolvedPos.t, ~head: PM_Model.ResolvedPos.t) =>
     option(PM_State.Selection.t);
+
   type nodeViewInit =
     (
       ~node: PM_Model.Node.t,
@@ -74,22 +81,30 @@ module DirectEditorProps = {
       ~decorations: array(Decoration.t)
     ) =>
     NodeView.t;
+
   type pasteHandler =
     (~view: Types.editorView, ~event: Dom.event, ~slice: PM_Model.Slice.t) => bool;
+
   module Attributes = PM_EditorProps.Attributes;
+
   module ScrollThreshold = PM_EditorProps.ScrollThreshold;
+
   module ScrollMargin = PM_EditorProps.ScrollMargin;
+
   module type DispatchTransaction = {
     type t;
     let make: ((Types.editorView, PM_State.Transaction.t) => unit) => t;
   };
+
   module DispatchTransaction: DispatchTransaction = {
     [@unboxed]
-    type t = 
-      | Any([@bs.this]((Types.editorView, PM_State.Transaction.t) => unit)): t;
+    type t =
+      | Any([@bs.this] ((Types.editorView, PM_State.Transaction.t) => unit)): t;
+
     let make: ((Types.editorView, PM_State.Transaction.t) => unit) => t =
       fn => Any([@bs.this] (a, b) => fn(a, b));
   };
+
   [@bs.deriving abstract]
   type t = {
     [@bs.optional]
@@ -152,6 +167,7 @@ module DirectEditorProps = {
     [@bs.optional]
     dispatchTransaction: DispatchTransaction.t,
   };
+
   let make =
       (
         ~state: PM_State.EditorState.t,
@@ -187,7 +203,7 @@ module DirectEditorProps = {
         ~scrollMargin: option(ScrollMargin.t)=?,
         ~dispatchTransaction: option((Types.editorView, PM_State.Transaction.t) => unit)=?,
         (),
-      ) => 
+      ) =>
     t(
       ~handleDOMEvents?,
       ~handleKeyDown?,
@@ -229,8 +245,7 @@ external make:
   "EditorView";
 
 [@bs.module "prosemirror-view"] [@bs.new]
-external makeWithNull: ([@bs.as {json|null|json}] _, DirectEditorProps.t) => t =
-  "EditorView";
+external makeWithNull: ([@bs.as {json|null|json}] _, DirectEditorProps.t) => t = "EditorView";
 
 [@bs.get] external state: t => PM_State.EditorState.t = "state";
 

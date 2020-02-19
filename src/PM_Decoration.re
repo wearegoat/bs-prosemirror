@@ -9,7 +9,8 @@ type spec = Js.Dict.t(string);
 [@bs.deriving abstract]
 type t = {
   from: int,
-  [@bs.as "to"] to_: int,
+  [@bs.as "to"]
+  to_: int,
   spec,
 };
 
@@ -38,6 +39,7 @@ external widget:
   ) =>
   t =
   "widget";
+
 [@bs.deriving abstract]
 type inlineSpec = {
   [@bs.optional]
@@ -45,6 +47,7 @@ type inlineSpec = {
   [@bs.optional]
   inclusiveEnd: bool,
 };
+
 [@bs.module "prosemirror-view"] [@bs.scope "Decoration"]
 external inline: (~from: int, ~to_: int, ~attrs: Attrs.t, ~spec: inlineSpec=?, unit) => t =
   "inline";

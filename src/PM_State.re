@@ -1,22 +1,30 @@
 module Model = PM_Model;
+
 module ResolvedPos = Model.ResolvedPos;
+
 module Transform = PM_Transform;
+
 module Types = PM_Types;
+
 module EditorProps = PM_EditorProps;
 
 module SelectionRange = {
   type t;
+
   [@bs.module "prosemirror-state"] [@bs.new]
   external make: (~resolvedFrom: Model.ResolvedPos.t, ~resolvedTo: Model.ResolvedPos.t) => t =
     "SelectionRange";
 
   [@bs.get] external resolvedFrom: t => Model.ResolvedPos.t = "$from";
+
   [@bs.get] external resolvedTo: t => Model.ResolvedPos.t = "$to";
 };
 
 module SelectionBookmark = {
   type t;
+
   [@bs.send] external map: (t, ~mapping: Transform.Mapping.t) => t = "map";
+
   [@bs.send] external resolve: (t, ~doc: Model.Node.t) => Types.selection = "resolve";
 };
 
@@ -24,7 +32,9 @@ module SelectionKind = {
   type selectionClass;
 
   [@bs.module "prosemirror-state"] external nodeSelection: selectionClass = "NodeSelection";
+
   [@bs.module "prosemirror-state"] external textSelection: selectionClass = "TextSelection";
+
   [@bs.module "prosemirror-state"] external allSelection: selectionClass = "AllSelection";
 
   let isKind: (Types.selection, selectionClass) => bool = [%bs.raw
@@ -34,6 +44,7 @@ module SelectionKind = {
         }
       |}
   ];
+
   let selectionToNodeSelection = a =>
     if (isKind(a, nodeSelection)) {
       let ns: Types.nodeSelection = Obj.magic(a);
@@ -41,6 +52,7 @@ module SelectionKind = {
     } else {
       None;
     };
+
   let selectionToTextSelection = a =>
     if (isKind(a, textSelection)) {
       let ns: Types.textSelection = Obj.magic(a);
@@ -48,6 +60,7 @@ module SelectionKind = {
     } else {
       None;
     };
+
   let selectionToAllSelection = a =>
     if (isKind(a, allSelection)) {
       let ns: Types.allSelection = Obj.magic(a);
@@ -55,24 +68,32 @@ module SelectionKind = {
     } else {
       None;
     };
+
   let nodeSelectionToSelection: Types.nodeSelection => Types.selection = a => Obj.magic(a);
+
   let textSelectionToSelection: Types.textSelection => Types.selection = a => Obj.magic(a);
+
   let allSelectionToSelection: Types.allSelection => Types.selection = a => Obj.magic(a);
 
   type constructor;
+
   [@bs.get] external constructor: Types.selection => constructor = "constructor";
+
   [@bs.get] external name: constructor => string = "name";
+
   let className = selection => selection->constructor->name;
 
-  external toNodeSelection : Types.selection => Types.nodeSelection = "%identity";
-  external toTextSelection : Types.selection => Types.textSelection = "%identity";
-  external toAllSelection : Types.selection => Types.allSelection = "%identity";
+  external toNodeSelection: Types.selection => Types.nodeSelection = "%identity";
+
+  external toTextSelection: Types.selection => Types.textSelection = "%identity";
+
+  external toAllSelection: Types.selection => Types.allSelection = "%identity";
 
   type t = [
     | `NodeSelection(Types.nodeSelection)
     | `TextSelection(Types.textSelection)
     | `AllSelection(Types.allSelection)
-    ];
+  ];
 
   let classify = (selection: Types.selection): [> t] =>
     switch (selection->className) {
@@ -83,10 +104,7 @@ module SelectionKind = {
     };
 
   let classifyCustom =
-      (
-        selection: Types.selection,
-        ~custom: (Types.selection, string) => option([> t] as 'a),
-      )
+      (selection: Types.selection, ~custom: (Types.selection, string) => option([> t] as 'a))
       : ([> t] as 'a) =>
     try (classify(selection)) {
     | Failure(_) as f =>
@@ -95,60 +113,104 @@ module SelectionKind = {
       | None => raise(f)
       }
     };
-
 };
 
 module Selection = {
   type t = Types.selection;
+
   module type T = {
     type t;
+
     let ranges: t => array(SelectionRange.t);
+
     let resolvedAnchor: t => Model.ResolvedPos.t;
+
     let resolvedHead: t => Model.ResolvedPos.t;
+
     let anchor: t => int;
+
     let head: t => int;
+
     let from: t => int;
+
     let to_: t => int;
+
     let resolvedFrom: t => Model.ResolvedPos.t;
+
     let resolvedTo: t => Model.ResolvedPos.t;
+
     let empty: t => bool;
+
     let eq: (t, t) => bool;
+
     let map: (t, ~doc: Model.Node.t, ~mapping: Transform.Mapping.t) => t;
+
     let content: t => Model.Slice.t;
+
     let replace: (t, ~tr: Types.transaction, ~content: Model.Slice.t=?, unit) => unit;
+
     let replaceWith: (t, ~tr: Types.transaction, ~node: Model.Node.t) => unit;
+
     let toJSON: t => Js.Json.t;
+
     let getBookmark: t => SelectionBookmark.t;
+
     let visible: t => bool;
+
     let findFrom:
       (~resolvedPos: Model.ResolvedPos.t, ~dir: int, ~textOnly: bool=?, unit) => option(t);
+
     let near: (~resolvedPos: Model.ResolvedPos.t, ~bias: int=?, unit) => option(t);
+
     let atStart: (~doc: Model.Node.t) => t;
+
     let atEnd: (~doc: Model.Node.t) => t;
+
     let fromJSON: (~doc: Model.Node.t, ~json: Js.Json.t) => t;
+
     let jsonID: (~id: string, ~selectionClass: t) => t;
   };
+
   module Make = (M: {type t;}) : (T with type t := M.t) => {
     type t = M.t;
+
     [@bs.get] external ranges: t => array(SelectionRange.t) = "ranges";
+
     [@bs.get] external resolvedAnchor: t => Model.ResolvedPos.t = "$anchor";
+
     [@bs.get] external resolvedHead: t => Model.ResolvedPos.t = "$head";
+
     [@bs.get] external anchor: t => int = "anchor";
+
     [@bs.get] external head: t => int = "head";
+
     [@bs.get] external from: t => int = "from";
+
     [@bs.get] external to_: t => int = "to";
+
     [@bs.get] external resolvedFrom: t => Model.ResolvedPos.t = "$from";
+
     [@bs.get] external resolvedTo: t => Model.ResolvedPos.t = "$to";
+
     [@bs.get] external empty: t => bool = "empty";
+
     [@bs.send] external eq: (t, t) => bool = "eq";
+
     [@bs.send] external map: (t, ~doc: Model.Node.t, ~mapping: Transform.Mapping.t) => t = "map";
+
     [@bs.send] external content: t => Model.Slice.t = "content";
+
     [@bs.send]
-    external replace: (t, ~tr: Types.transaction, ~content: Model.Slice.t=?, unit) => unit = "replace";
+    external replace: (t, ~tr: Types.transaction, ~content: Model.Slice.t=?, unit) => unit =
+      "replace";
+
     [@bs.send]
     external replaceWith: (t, ~tr: Types.transaction, ~node: Model.Node.t) => unit = "replaceWith";
+
     [@bs.send] external toJSON: t => Js.Json.t = "toJSON";
+
     [@bs.send] external getBookmark: t => SelectionBookmark.t = "getBookmark";
+
     [@bs.get] external visible: t => bool = "visible";
 
     [@bs.return nullable] [@bs.module "prosemirror-state"] [@bs.scope "Selection"]
@@ -179,6 +241,7 @@ module Selection = {
     [@bs.module "prosemirror-state"] [@bs.scope "Selection"]
     external jsonID: (~id: string, ~selectionClass: t) => t = "jsonID";
   };
+
   include Make({
     type nonrec t = t;
   });
@@ -193,13 +256,21 @@ module Selection = {
     ) =>
     t =
     "Selection";
+
   let toNodeSelection = SelectionKind.selectionToNodeSelection;
+
   let toTextSelection = SelectionKind.selectionToTextSelection;
+
   let toAllSelection = SelectionKind.selectionToAllSelection;
+
   let fromNodeSelection = SelectionKind.nodeSelectionToSelection;
+
   let fromTextSelection = SelectionKind.textSelectionToSelection;
+
   let fromAllSelection = SelectionKind.allSelectionToSelection;
+
   let classify = SelectionKind.classify;
+
   let classifyCustom = SelectionKind.classifyCustom;
 };
 
@@ -231,14 +302,17 @@ module TextSelection = {
     ) =>
     Selection.t =
     "between";
+
   let fromSelection = SelectionKind.selectionToTextSelection;
 };
 
 module NodeSelection = {
   type t = Types.nodeSelection;
+
   include Selection.Make({
     type nonrec t = t;
   });
+
   [@bs.module "prosemirror-state"] [@bs.new]
   external make: Model.ResolvedPos.t => t = "NodeSelection";
 
@@ -255,11 +329,14 @@ module NodeSelection = {
 
 module AllSelection = {
   type t = Types.allSelection;
+
   include Selection.Make({
     type nonrec t = t;
   });
+
   [@bs.module "prosemirror-state"] [@bs.new]
   external make: (~doc: Model.Node.t) => t = "AllSelection";
+
   let fromSelection = SelectionKind.selectionToAllSelection;
 };
 
@@ -284,12 +361,18 @@ module EditorState = {
   };
 
   [@bs.get] external doc: t => Model.Node.t = "doc";
+
   [@bs.get] external selection: t => Selection.t = "selection";
+
   [@bs.return nullable] [@bs.get]
   external storedMarks: t => option(array(Model.Mark.t)) = "storedMarks";
+
   [@bs.get] external schema: t => Model.Schema.t = "schema";
+
   [@bs.get] external plugins: t => array(Types.untypedPlugin) = "plugins";
+
   [@bs.send] external apply: (t, Types.transaction) => t = "apply";
+
   [@bs.send]
   external applyTransaction:
     (t, Types.transaction) =>
@@ -299,7 +382,9 @@ module EditorState = {
       "transactions": array(Types.transaction),
     } =
     "applyTransaction";
+
   [@bs.get] external tr: t => Types.transaction = "tr";
+
   [@bs.send] external reconfigure: (t, Config.t) => t = "reconfigure";
 
   [@bs.send]
@@ -317,11 +402,17 @@ module EditorState = {
 
   [@bs.module "prosemirror-state"] [@bs.scope "EditorState"]
   external create: Config.t => t = "create";
+
   [@bs.module "prosemirror-state"] [@bs.scope "EditorState"]
   external fromJSON:
-    (~config: Config.t, ~json: Js.Json.t, ~pluginFields: Js.Dict.t(Types.untypedPlugin)=?, unit) 
-    => t = "fromJSON";
-  /* Apply the given transaction to produce a new state. */
+    (
+      ~config: Config.t,
+      ~json: Js.Json.t,
+      ~pluginFields: Js.Dict.t(Types.untypedPlugin)=?,
+      unit
+    ) =>
+    t =
+    "fromJSON";
 };
 
 module PluginKey = {
@@ -359,7 +450,9 @@ module StateField = {
 module PluginSpec = {
   module View = {
     type update = (Types.editorView, Types.editorState) => unit;
+
     type destroy = unit => unit;
+
     [@bs.deriving abstract]
     type t = {
       [@bs.optional]
@@ -367,6 +460,7 @@ module PluginSpec = {
       [@bs.optional]
       destroy,
     };
+
     let make = t;
   };
 
@@ -391,7 +485,7 @@ module PluginSpec = {
       ) =>
       Js.Nullable.t(Types.transaction),
     [@bs.optional]
-    historyPreserveItems: bool
+    historyPreserveItems: bool,
   };
 
   let make = t;
@@ -402,70 +496,89 @@ module Plugin = {
 
   [@bs.module "prosemirror-state"] [@bs.new]
   external make: (~spec: PluginSpec.t('a)) => Types.plugin('a) = "Plugin";
+
   [@bs.module "prosemirror-state"] [@bs.new]
   external makeUntyped: (~spec: PluginSpec.t('a)) => Types.untypedPlugin = "Plugin";
+
   external toUntyped: t('a) => Types.untypedPlugin = "%identity";
+
   external fromUntyped: Types.untypedPlugin => t('a) = "%identity";
+
   [@bs.get] external props: t('a) => EditorProps.t = "props";
+
   [@bs.get] external spec: t('a) => PluginSpec.t('a) = "spec";
+
   [@bs.send] external getState: (t('a), ~state: Types.editorState) => 'a = "getState";
 };
 
 module Transaction = {
   type t = Types.transaction;
+
   include PM_Transform.Transform.Make({
     type nonrec t = t;
   });
+
   [@bs.get] external time: t => float = "time";
+
   [@bs.return nullable] [@bs.get]
   external storedMarks: t => option(array(Model.Mark.t)) = "storedMarks";
+
   [@bs.get] external selection: t => Selection.t = "selection";
+
   [@bs.send] external setSelection: (t, Selection.t) => t = "setSelection";
+
   [@bs.get] external selectionSet: t => bool = "selectionSet";
+
   [@bs.send]
   external setStoredMarks: (t, ~marks: array(Model.Mark.t)=?, unit) => t = "setStoredMarks";
+
   [@bs.send] external addStoredMark: (t, ~mark: Model.Mark.t) => t = "addStoredMark";
+
   [@bs.send] external ensureMarks: (t, array(PM_Model.Mark.t)) => t = "ensureMarks";
+
   [@bs.send]
   external removeStoredMark:
     (t, ~markOrMarkType: [@bs.unwrap] [ | `Mark(Model.Mark.t) | `MarkType(Model.MarkType.t)]) =>
     t =
     "removeStoredMark";
+
   [@bs.get] external storedMarksSet: t => bool = "storedMarksSet";
+
   [@bs.send] external setTime: (t, int) => t = "setTime";
+
   [@bs.send] external replaceSelection: (t, Model.Slice.t) => t = "replaceSelection";
+
   [@bs.send]
   external replaceSelectionWith: (t, ~node: Model.Node.t, ~inheritMarks: bool=?, unit) => t =
     "replaceSelectionWith";
+
   [@bs.send] external deleteSelection: t => t = "deleteSelection";
+
   [@bs.send]
   external insertText: (t, ~text: string, ~from: int=?, ~to_: int=?, unit) => t = "insertText";
+
   [@bs.get] external isGeneric: t => bool = "isGeneric";
+
   [@bs.send] external scrollIntoView: t => t = "scrollIntoView";
+
   [@bs.get] external scrolledIntoView: t => bool = "scrolledIntoView";
 
   module Meta = {
     module type T = {
       type v;
+
       let set:
         (
           t,
-          ~key: [
-                  | `String(string)
-                  | `Plugin(Plugin.t('a))
-                  | `PluginKey(PluginKey.t('a))
-                ],
+          ~key: [ | `String(string) | `Plugin(Plugin.t('a)) | `PluginKey(PluginKey.t('a))],
           ~value: v
         ) =>
         t;
+
       let get:
         (
           t,
-          ~key: [
-                  | `String(string)
-                  | `Plugin(Plugin.t('a))
-                  | `PluginKey(PluginKey.t('a))
-                ]
+          ~key: [ | `String(string) | `Plugin(Plugin.t('a)) | `PluginKey(PluginKey.t('a))]
         ) =>
         option(v);
     };

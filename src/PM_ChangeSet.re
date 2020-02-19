@@ -99,8 +99,7 @@ module ChangeSet = {
    */
   [@bs.send] [@bs.return nullable]
   external changedRange:
-    (t('a), ~b: t('b), ~maps: array(PM_Transform.StepMap.t)=?, unit) =>
-    option(range) =
+    (t('a), ~b: t('b), ~maps: array(PM_Transform.StepMap.t)=?, unit) => option(range) =
     "changedRange";
 
   /**
@@ -114,8 +113,7 @@ module ChangeSet = {
    * static create(doc: Node, combine: ?fn(a: any, b: any) → any) → ChangeSet
    */
   [@bs.module "prosemirror-changeset"] [@bs.scope "ChangeSet"]
-  external create:
-    (~doc: PM_Types.node, ~combine: ('a, 'a) => option('a)=?, unit) => t('a) =
+  external create: (~doc: PM_Types.node, ~combine: ('a, 'a) => option('a)=?, unit) => t('a) =
     "create";
 
   /**
@@ -128,7 +126,6 @@ module ChangeSet = {
    */
   [@bs.module "prosemirror-changeset"]
   external simplifyChanges:
-    (~changes: array(Change.t('a)), ~doc: PM_Types.node) =>
-    array(Change.t('a)) =
+    (~changes: array(Change.t('a)), ~doc: PM_Types.node) => array(Change.t('a)) =
     "simplifyChanges";
 };

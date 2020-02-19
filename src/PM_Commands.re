@@ -36,6 +36,7 @@ external createParagraphNear: Command.t = "createParagraphNear";
 [@bs.module "prosemirror-commands"] external liftEmptyBlock: Command.t = "liftEmptyBlock";
 
 [@bs.module "prosemirror-commands"] external splitBlock: Command.t = "splitBlock";
+
 [@bs.module "prosemirror-commands"]
 external splitBlockKeepMarks: Command.t = "splitBlockKeepMarks";
 

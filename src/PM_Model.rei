@@ -1,7 +1,10 @@
 module Attrs: {
   type t;
+
   let make: Js.t({..}) => t;
+
   let toJs: t => Js.t({..});
+
   let empty: unit => t;
 };
 
@@ -439,7 +442,7 @@ module ContentMatch: {
    edge(n: number) → {type: NodeType, next: ContentMatch}
    */
   let edge:
-    (t, ~n:int) =>
+    (t, ~n: int) =>
     {
       .
       "_type": PM_Types.nodeType,

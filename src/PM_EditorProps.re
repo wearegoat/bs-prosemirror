@@ -6,33 +6,40 @@ type pos = {
   bottom: int,
   left: int,
 };
+
 module type Attributes = {
   type t;
+
   let makeFromDict: Js.Dict.t(string) => t;
+
   let makeFromFn: (PM_Types.editorState => option(Js.Dict.t(string))) => t;
 };
-module Attributes : Attributes = {
+
+module Attributes: Attributes = {
   [@unboxed]
   type t =
     | Any('a): t;
-  
+
   let makeFromDict: Js.Dict.t(string) => t = dict => Any(dict);
-  let makeFromFn: (PM_Types.editorState => option(Js.Dict.t(string))) => t =
-    fn => Any(fn);
+
+  let makeFromFn: (PM_Types.editorState => option(Js.Dict.t(string))) => t = fn => Any(fn);
 };
 
 module type ScrollParam = {
   type t;
-  let makeFromInt: int => t;
-  let makeFromPos: pos => t;
-}
 
-module ScrollThreshold : ScrollParam = {
+  let makeFromInt: int => t;
+
+  let makeFromPos: pos => t;
+};
+
+module ScrollThreshold: ScrollParam = {
   [@unboxed]
   type t =
     | Any('a): t;
-  
+
   let makeFromInt: int => t = i => Any(i);
+
   let makeFromPos: pos => t = pos => Any(pos);
 };
 
@@ -41,17 +48,13 @@ module ScrollMargin = ScrollThreshold;
 [@bs.deriving abstract]
 type t = {
   [@bs.optional]
-  handleDOMEvents:
-    Js.Dict.t((~view: Types.editorView, ~event: Dom.event) => bool),
+  handleDOMEvents: Js.Dict.t((~view: Types.editorView, ~event: Dom.event) => bool),
   [@bs.optional]
-  handleKeyDown:
-    (~view: Types.editorView, ~event: Dom.keyboardEvent) => bool,
+  handleKeyDown: (~view: Types.editorView, ~event: Dom.keyboardEvent) => bool,
   [@bs.optional]
-  handleKeyPress:
-    (~view: Types.editorView, ~event: Dom.keyboardEvent) => bool,
+  handleKeyPress: (~view: Types.editorView, ~event: Dom.keyboardEvent) => bool,
   [@bs.optional]
-  handleTextInput:
-    (~view: Types.editorView, ~from: int, ~to_: int, ~text: string) => bool,
+  handleTextInput: (~view: Types.editorView, ~from: int, ~to_: int, ~text: string) => bool,
   [@bs.optional]
   handleClickOn:
     (
@@ -64,8 +67,7 @@ type t = {
     ) =>
     bool,
   [@bs.optional]
-  handleClick:
-    (~view: Types.editorView, ~pos: int, ~event: Dom.mouseEvent) => bool,
+  handleClick: (~view: Types.editorView, ~pos: int, ~event: Dom.mouseEvent) => bool,
   [@bs.optional]
   handleDoubleClickOn:
     (
@@ -78,8 +80,7 @@ type t = {
     ) =>
     bool,
   [@bs.optional]
-  handleDoubleClick:
-    (~view: Types.editorView, ~pos: int, ~event: Dom.mouseEvent) => bool,
+  handleDoubleClick: (~view: Types.editorView, ~pos: int, ~event: Dom.mouseEvent) => bool,
   [@bs.optional]
   handleTripleClickOn:
     (
@@ -92,30 +93,17 @@ type t = {
     ) =>
     bool,
   [@bs.optional]
-  handleTripleClick:
-    (~view: Types.editorView, ~pos: int, ~event: Dom.mouseEvent) => bool,
+  handleTripleClick: (~view: Types.editorView, ~pos: int, ~event: Dom.mouseEvent) => bool,
   [@bs.optional]
-  handlePaste:
-    (~view: Types.editorView, ~event: Dom.event, ~slice: PM_Model.Slice.t) =>
-    bool,
+  handlePaste: (~view: Types.editorView, ~event: Dom.event, ~slice: PM_Model.Slice.t) => bool,
   [@bs.optional]
   handleDrop:
-    (
-      ~view: Types.editorView,
-      ~event: Dom.event,
-      ~slice: PM_Model.Slice.t,
-      ~moved: bool
-    ) =>
-    bool,
+    (~view: Types.editorView, ~event: Dom.event, ~slice: PM_Model.Slice.t, ~moved: bool) => bool,
   [@bs.optional]
   handleScrollToSelection: Types.editorView => bool,
   [@bs.optional]
   createSelectionBetween:
-    (
-      ~view: Types.editorView,
-      ~anchor: PM_Model.ResolvedPos.t,
-      ~head: PM_Model.ResolvedPos.t
-    ) =>
+    (~view: Types.editorView, ~anchor: PM_Model.ResolvedPos.t, ~head: PM_Model.ResolvedPos.t) =>
     option(PM_Types.selection),
   [@bs.optional]
   domParser: PM_Model.DOMParser.t,
@@ -126,8 +114,7 @@ type t = {
   [@bs.optional]
   transformPastedText: (~text: string) => string,
   [@bs.optional]
-  clipboardTextParser:
-    (~text: string, ~context: PM_Model.ResolvedPos.t) => PM_Model.Slice.t,
+  clipboardTextParser: (~text: string, ~context: PM_Model.ResolvedPos.t) => PM_Model.Slice.t,
   [@bs.optional]
   transformPasted: PM_Model.Slice.t => PM_Model.Slice.t,
   [@bs.optional]

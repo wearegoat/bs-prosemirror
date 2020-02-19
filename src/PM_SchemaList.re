@@ -3,6 +3,7 @@ module Command = PM_Command;
 [@bs.module "prosemirror-schema-list"] external orderedList: PM_Model.NodeSpec.t = "orderedList";
 
 [@bs.module "prosemirror-schema-list"] external bulletList: PM_Model.NodeSpec.t = "bulletList";
+
 [@bs.module "prosemirror-schema-list"] external listItem: PM_Model.NodeSpec.t = "listItem";
 
 [@bs.module "prosemirror-schema-list"]

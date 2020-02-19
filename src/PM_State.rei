@@ -3,6 +3,7 @@ module Transform = PM_Transform;
 /** Represents a selected range in a document. */
 module SelectionRange: {
   type t;
+
   let make: (~resolvedFrom: PM_Model.ResolvedPos.t, ~resolvedTo: PM_Model.ResolvedPos.t) => t;
 
   /** The lower bound of the range. $from */
@@ -31,27 +32,37 @@ module SelectionBookmark: {
   return an optional subclass by using javascript reflection underneath */
 module SelectionKind: {
   type selectionClass;
+
   let nodeSelection: selectionClass;
+
   let textSelection: selectionClass;
+
   let allSelection: selectionClass;
+
   let isKind: (PM_Types.selection, selectionClass) => bool;
+
   let selectionToNodeSelection: PM_Types.selection => option(PM_Types.nodeSelection);
+
   let selectionToTextSelection: PM_Types.selection => option(PM_Types.textSelection);
+
   let selectionToAllSelection: PM_Types.selection => option(PM_Types.allSelection);
+
   let nodeSelectionToSelection: PM_Types.nodeSelection => PM_Types.selection;
+
   let textSelectionToSelection: PM_Types.textSelection => PM_Types.selection;
+
   let allSelectionToSelection: PM_Types.allSelection => PM_Types.selection;
+
   type t = [
     | `NodeSelection(PM_Types.nodeSelection)
     | `TextSelection(PM_Types.textSelection)
     | `AllSelection(PM_Types.allSelection)
-    ];
+  ];
+
   let classify: PM_Types.selection => t;
+
   let classifyCustom:
-    (
-      PM_Types.selection,
-      ~custom: (PM_Types.selection, string) => option([> t] as 'a)
-    ) =>
+    (PM_Types.selection, ~custom: (PM_Types.selection, string) => option([> t] as 'a)) =>
     ([> t] as 'a);
 };
 
@@ -65,6 +76,7 @@ instantiated directly.
 */
 module Selection: {
   type t = PM_Types.selection;
+
   module type T = {
     type t;
 
@@ -212,8 +224,11 @@ module Selection: {
      */
     let jsonID: (~id: string, ~selectionClass: t) => t;
   };
+
   module Make: (M: {type t;}) => T with type t := M.t;
+
   include T with type t := t;
+
   /**
     Initialize a selection with the head and anchor and ranges. If no ranges are given, constructs a single range across $anchor and $head.
     new Selection($anchor: ResolvedPos, $head: ResolvedPos, ranges: ?⁠[SelectionRange])
@@ -226,18 +241,25 @@ module Selection: {
       unit
     ) =>
     t;
+
   let toNodeSelection: PM_Types.selection => option(PM_Types.nodeSelection);
+
   let toTextSelection: PM_Types.selection => option(PM_Types.textSelection);
+
   let toAllSelection: PM_Types.selection => option(PM_Types.allSelection);
+
   let fromNodeSelection: PM_Types.nodeSelection => PM_Types.selection;
+
   let fromTextSelection: PM_Types.textSelection => PM_Types.selection;
+
   let fromAllSelection: PM_Types.allSelection => PM_Types.selection;
+
   let classify: PM_Types.selection => SelectionKind.t;
+
   let classifyCustom:
     (
       PM_Types.selection,
-      ~custom: (PM_Types.selection, string) =>
-               option([> SelectionKind.t] as 'a)
+      ~custom: (PM_Types.selection, string) => option([> SelectionKind.t] as 'a)
     ) =>
     ([> SelectionKind.t] as 'a);
 };
@@ -247,6 +269,7 @@ module Selection: {
   cursor position). */
 module TextSelection: {
   type t = PM_Types.textSelection;
+
   include Selection.T with type t := t;
 
   /**
@@ -295,6 +318,7 @@ the selected node, anchor equals from, and head equals to..
 */
 module NodeSelection: {
   type t = PM_Types.nodeSelection;
+
   include Selection.T with type t := t;
 
   /**
@@ -331,12 +355,15 @@ the document).
 */
 module AllSelection: {
   type t = PM_Types.allSelection;
+
   include Selection.T with type t := t;
+
   /**
     new AllSelection(doc: Node)
     Create an all-selection over the given document.
    */
   let make: (~doc: PM_Model.Node.t) => t;
+
   let fromSelection: PM_Types.selection => option(PM_Types.allSelection);
 };
 
@@ -348,6 +375,7 @@ module AllSelection: {
 */
 module EditorState: {
   type t = PM_Types.editorState;
+
   module Config: {
     type t;
     let make:
@@ -361,6 +389,7 @@ module EditorState: {
       ) =>
       t;
   };
+
   /**
     The current document.
     doc: Node
@@ -446,7 +475,13 @@ module EditorState: {
     static fromJSON(config: Object, json: Object, pluginFields: ?⁠Object<Plugin>) → EditorState
    */
   let fromJSON:
-    (~config: Config.t, ~json: Js.Json.t, ~pluginFields: Js.Dict.t(PM_Types.untypedPlugin)=?, unit) => t;
+    (
+      ~config: Config.t,
+      ~json: Js.Json.t,
+      ~pluginFields: Js.Dict.t(PM_Types.untypedPlugin)=?,
+      unit
+    ) =>
+    t;
 };
 
 module PluginKey: {
@@ -469,6 +504,7 @@ state it wants to keep. Functions provided here are always called with the plugi
 this binding. */
 module StateField: {
   type t('a);
+
   /**
     [init] Initialize the value of the field. config will be the object passed to EditorState.create. Note that instance is a half-initialized state instance, and will not have values for plugin fields initialized after this one.
     init(config: Object, instance: EditorState) → T
@@ -523,6 +559,7 @@ module PluginSpec: {
   };
 
   type t('a);
+
   /**
     [props] is the view props added by this plugin. Props that are functions will be bound to have the plugin instance as their this binding.
     props: ?⁠PM_EditorProps
@@ -569,14 +606,21 @@ module PluginSpec: {
   and may influence that state and the view that contains it. */
 module Plugin: {
   type t('a) = PM_Types.plugin('a);
+
   let make: (~spec: PluginSpec.t('a)) => t('a);
+
   let makeUntyped: (~spec: PluginSpec.t('a)) => PM_Types.untypedPlugin;
+
   let toUntyped: t('a) => PM_Types.untypedPlugin;
+
   let fromUntyped: PM_Types.untypedPlugin => t('a);
+
   /** The props exported by this plugin. */
   let props: t('a) => PM_EditorProps.t;
+
   /** The plugin's spec object */
   let spec: t('a) => PluginSpec.t('a);
+
   /** Extract the plugin's state field from an editor state */
   let getState: (t('a), ~state: PM_Types.editorState) => 'a;
 };
@@ -596,10 +640,10 @@ true to selection transactions directly caused by mouse or touch input, and a "u
 that may be "paste", "cut", or "drop".
 */
 module Transaction: {
-  /**
-   */
   type t = PM_Types.transaction;
+
   include PM_Transform.Transform.T with type t := t;
+
   /**
     The timestamp associated with this transaction, in the same format as Date.now().
     time: number
@@ -711,9 +755,8 @@ module Transaction: {
    */
   let scrolledIntoView: t => bool;
 
-  module Meta : {
+  module Meta: {
     module type T = {
-
       type v;
 
       /**
@@ -723,11 +766,7 @@ module Transaction: {
       let set:
         (
           t,
-          ~key: [
-                  | `String(string)
-                  | `Plugin(Plugin.t('a))
-                  | `PluginKey(PluginKey.t('a))
-                ],
+          ~key: [ | `String(string) | `Plugin(Plugin.t('a)) | `PluginKey(PluginKey.t('a))],
           ~value: v
         ) =>
         t;
@@ -739,15 +778,11 @@ module Transaction: {
       let get:
         (
           t,
-          ~key: [
-                  | `String(string)
-                  | `Plugin(Plugin.t('a))
-                  | `PluginKey(PluginKey.t('a))
-                ]
+          ~key: [ | `String(string) | `Plugin(Plugin.t('a)) | `PluginKey(PluginKey.t('a))]
         ) =>
         option(v);
     };
 
-    module Make : (M: {type v;}) => (T with type v := M.v);
+    module Make: (M: {type v;}) => T with type v := M.v;
   };
 };

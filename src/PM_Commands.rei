@@ -196,6 +196,7 @@ let autoJoin:
                  ]
   ) =>
   PM_Command.t;
+
 /**
  Depending on the detected platform, this will hold pcBasekeymap or macBaseKeymap.
  baseKeymap: Object
